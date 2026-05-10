@@ -1,0 +1,14 @@
+# Veliki podatki
+*.yaml
+*.parquet
+
+# Generirane slike
+*.png
+
+# FIS raw HTML
+fis_raw_*.html
+
+# Venv
+__pycache__/
+validacija.csv
+prevc_results_2026.csv
