@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<title>Medijska Asimetrija</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  @page {
+    size: 297mm 167mm;
+    margin: 0;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #e2e8f0;
+  }
+
+  /* ── Slide ── */
+  .slide {
+    width: 297mm;
+    height: 167mm;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 6px;
+  }
+
+  /* ── Naslovnica ── */
+  .slide-cover {
+    background: #0f172a;
+    color: #fff;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .cover-left {
+    flex: 1;
+    padding: 36px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .cover-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #818cf8;
+    margin-bottom: 18px;
+  }
+
+  .cover-title {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+
+  .cover-sub {
+    font-size: 14px;
+    font-weight: 300;
+    color: #94a3b8;
+    line-height: 1.5;
+    max-width: 360px;
+    margin-bottom: 32px;
+  }
+
+  .cover-meta {
+    font-size: 11px;
+    color: #475569;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .cover-right {
+    width: 220px;
+    background: #1e293b;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 28px;
+    gap: 20px;
+  }
+
+  .cover-stat {
+    text-align: right;
+  }
+
+  .cover-stat-val {
+    font-size: 32px;
+    font-weight: 800;
+    color: #818cf8;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .cover-stat-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #475569;
+    margin-top: 3px;
+  }
+
+  /* ── Slide z naslovom zgoraj ── */
+  .slide-header {
+    padding: 28px 44px 0;
+    flex-shrink: 0;
+  }
+
+  .slide-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #6366f1;
+    margin-bottom: 6px;
+  }
+
+  .slide-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #0f172a;
+    line-height: 1.15;
+  }
+
+  .slide-body {
+    flex: 1;
+    padding: 16px 44px 24px;
+    display: flex;
+    gap: 28px;
+    min-height: 0;
+  }
+
+  /* ── Temni slide ── */
+  .slide-dark {
+    background: #0f172a;
+    color: #fff;
+  }
+
+  .slide-dark .slide-tag { color: #818cf8; }
+  .slide-dark .slide-title { color: #f8fafc; }
+
+  /* ── Sekcija v barvni ── */
+  .slide-section {
+    background: #6366f1;
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .section-number {
+    font-size: 72px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.12);
+    letter-spacing: -0.06em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+  }
+
+  .section-title {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+    position: relative;
+  }
+
+  .section-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 10px;
+    font-weight: 400;
+    position: relative;
+  }
+
+  /* ── Akcentna črta ── */
+  .accent-bar {
+    width: 40px;
+    height: 4px;
+    background: #6366f1;
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+
+  .slide-dark .accent-bar { background: #818cf8; }
+
+  /* ── Screenshot ── */
+  .screenshot {
+    width: 100%;
+    height: 100%;
+    background: #f1f5f9;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 12px;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .screenshot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+  }
+
+  /* ── Bullet ── */
+  .bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.45;
+  }
+
+  .bullets li::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #6366f1;
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  .slide-dark .bullets li { color: #cbd5e1; }
+  .slide-dark .bullets li::before { background: #818cf8; }
+
+  /* ── Tabela ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    background: #f8fafc;
+    padding: 8px 14px;
+    text-align: left;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #374151;
+    vertical-align: middle;
+    font-size: 13.5px;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  .best { font-weight: 700; color: #16a34a; }
+  .med  { color: #b45309; }
+  .bad  { color: #dc2626; }
+  .winner { background: #f0fdf4; }
+
+  /* ── Metrike ── */
+  .metrics {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .metric {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide-dark .metric {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .metric-val {
+    font-size: 34px;
+    font-weight: 800;
+    color: #6366f1;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .slide-dark .metric-val { color: #818cf8; }
+
+  .metric-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  /* ── Pipeline ── */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .pipe-step {
+    flex: 1;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+
+  .pipe-step strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+
+  .pipe-step span {
+    font-size: 10.5px;
+    color: #64748b;
+  }
+
+  .pipe-arrow {
+    color: #cbd5e1;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* ── Callout ── */
+  .callout {
+    background: #f0f0fe;
+    border-left: 4px solid #6366f1;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+  }
+
+  .callout strong { color: #4f46e5; }
+
+  .callout-green {
+    background: #f0fdf4;
+    border-left-color: #16a34a;
+  }
+  .callout-green strong { color: #15803d; }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: #f5f3ff; color: #7c3aed; }
+  .badge-blue   { background: #eff6ff; color: #2563eb; }
+  .badge-green  { background: #dcfce7; color: #16a34a; }
+  .badge-yellow { background: #fef9c3; color: #b45309; }
+
+  /* ── Col layout ── */
+  .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── Slide number ── */
+  .slide-num {
+    position: absolute;
+    bottom: 14px;
+    right: 24px;
+    font-size: 9px;
+    color: #cbd5e1;
+    font-weight: 500;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: none; }
+    .slide { margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ 1. NASLOVNICA ══ -->
+<div class="slide slide-cover">
+  <div class="cover-left">
+    <div class="cover-tag">Projekt · Analiza medijev · Strojno učenje</div>
+    <div class="accent-bar"></div>
+    <div class="cover-title">Medijska<br>asimetrija</div>
+    <div class="cover-sub">Analiza sentimenta slovenskega športnega poročanja na RTV MMC (2023–2026)</div>
+    <div class="cover-meta">
+      <span>Miha Perpar</span>
+      <span>Maj 2026</span>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div class="cover-stat">
+      <div class="cover-stat-val">73k</div>
+      <div class="cover-stat-label">Vseh člankov</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-val">10k</div>
+      <div class="cover-stat-label">Analiziranih</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-val">12</div>
+      <div class="cover-stat-label">Športov</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-val">3</div>
+      <div class="cover-stat-label">Leta podatkov</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 2. PROBLEMATIKA ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Problematika</div>
+    <div class="slide-title">Ali novinarji reagirajo drugače na zmage kot na poraze?</div>
+  </div>
+  <div class="slide-body">
+    <div class="col" style="flex:1.1">
+      <ul class="bullets">
+        <li><strong>Hipoteza:</strong> slovensko poročanje o športu je asimetrično — odziv na zmage je intenzivnejši kot odziv na poraze</li>
+        <li>RTV MMC kot javni medij z obveznostjo nevtralnosti je idealen predmet analize</li>
+        <li>Podatki: YAML dump 73.461 člankov z naslovom, leadom, besedilom in datumom</li>
+      </ul>
+      <div class="callout" style="margin-top:auto">
+        <strong>Cilj:</strong> Izmeriti sentiment vsakega športnega članka in poiskati vzorce skozi čas — vrhe (zmage) in doline (porazi)
+      </div>
+    </div>
+    <div class="col" style="flex:1;justify-content:center">
+      <div class="pipeline" style="flex-direction:column;gap:8px">
+        <div class="pipe-step"><strong>mmc.yaml</strong><span>73k člankov → filtriramo 17.5k športnih</span></div>
+        <div class="pipe-arrow" style="transform:rotate(90deg);text-align:center">→</div>
+        <div class="pipe-step"><strong>Klasifikacija športov</strong><span>sentence embeddingi + logistična regresija</span></div>
+        <div class="pipe-arrow" style="transform:rotate(90deg);text-align:center">→</div>
+        <div class="pipe-step"><strong>Sentiment analiza</strong><span>XLM-RoBERTa, paragraph-level</span></div>
+        <div class="pipe-arrow" style="transform:rotate(90deg);text-align:center">→</div>
+        <div class="pipe-step"><strong>Vizualizacija</strong><span>LOWESS krivulja + interaktivni frontend</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">2</div>
+</div>
+
+<!-- ══ 3. APP — LANDING ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Aplikacija</div>
+    <div class="slide-title">Pregledna stran — primerjava 12 športov</div>
+  </div>
+  <div class="slide-body">
+    <div style="flex:2">
+      <div class="screenshot" style="height:100%">
+        <img src="screenshots/landing.png" alt="Landing" onerror="this.parentElement.innerHTML='<div style=\'padding:20px;color:#94a3b8;font-size:13px\'>📸 index.html<br>Seznam 12 športov s sparkline grafom in boxplotom</div>'">
+      </div>
+    </div>
+    <div class="col" style="flex:1;justify-content:center;gap:16px">
+      <ul class="bullets">
+        <li>12 športov urejenih po številu člankov</li>
+        <li>LOWESS krivulja sentimenta za vsak šport</li>
+        <li>Boxplot porazdelitve na desni</li>
+        <li>Klik zgoraj → primerjalni panel (do 5 športov)</li>
+        <li>Klik spodaj → detail stran</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-num">3</div>
+</div>
+
+<!-- ══ 4. APP — DETAIL ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Aplikacija</div>
+    <div class="slide-title">Detail stran — ekstremi in kontekst</div>
+  </div>
+  <div class="slide-body" style="gap:14px">
+    <div style="flex:1">
+      <p style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:6px">Krivulja + seznam ekstremov</p>
+      <div class="screenshot" style="height:calc(100% - 22px)">
+        <img src="screenshots/sport_detail.png" alt="Detail">
+      </div>
+    </div>
+    <div style="flex:1">
+      <p style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:6px">Kliknjen ekstrem — word cloud + članki</p>
+      <div class="screenshot" style="height:calc(100% - 22px)">
+        <img src="screenshots/context_panel.png" alt="Context">
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">4</div>
+</div>
+
+<!-- ══ 5. SEKCIJA — ML ══ -->
+<div class="slide slide-section">
+  <div class="section-number">ML</div>
+  <div class="section-title">Strojno učenje</div>
+  <div class="section-sub">Klasifikacija · Sentiment · Glajenje · Evalvacija</div>
+</div>
+
+<!-- ══ 6. KLASIFIKACIJA ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Klasifikacija športov</div>
+    <div class="slide-title">Sentence embeddingi + self-training</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <p style="font-size:14px;color:#374151;font-weight:600">Korak 1: Embedding-based klasifikacija</p>
+      <ul class="bullets">
+        <li>Model: <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px">paraphrase-multilingual-MiniLM-L12-v2</code></li>
+        <li>Vsak članek → 384-dim. vektor (naslov + lead + ključne besede)</li>
+        <li>Za vsak šport definiramo <em>sidro</em> — opis šport</li>
+        <li>Dodelimo šport z najvišjo kosinusno podobnostjo</li>
+        <li>Hitrost: ~5–15 s za 17.500 člankov na GPU</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p style="font-size:14px;color:#374151;font-weight:600">Korak 2: Self-training (iterativno)</p>
+      <ul class="bullets">
+        <li>~10–15% crossover med podobnimi športi (Rokomet ↔ Košarka)</li>
+        <li><strong>444 ročnih oznak</strong> zbranih s terminal app</li>
+        <li>Pseudo-labeli: top-150 zanesljivih primerov/šport</li>
+        <li>Logistična regresija na embeddingih, 5-fold CV</li>
+      </ul>
+      <div class="callout" style="margin-top:auto">
+        <strong>Zakaj MiniLM?</strong> 10× hitrejši od večjih modelov, za klasifikacijo po temi zadostuje — semantiko razume, GPU ni potreben.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">6</div>
+</div>
+
+<!-- ══ 7. SENTIMENT — PRIMERJAVA ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Sentiment analiza</div>
+    <div class="slide-title">Primerjava treh modelov — Cohen's κ na 121 ročnih oznakah</div>
+  </div>
+  <div class="slide-body" style="flex-direction:column;gap:16px">
+    <table>
+      <tr>
+        <th>Model</th>
+        <th style="text-align:center">Pozitivni</th>
+        <th style="text-align:center">Nevtralni</th>
+        <th style="text-align:center">Negativni</th>
+        <th style="text-align:center">κ</th>
+      </tr>
+      <tr>
+        <td><code style="font-size:11.5px">lxyuan/distilbert-base-multilingual</code></td>
+        <td style="text-align:center">80%</td>
+        <td style="text-align:center;color:#dc2626;font-weight:700">~0%</td>
+        <td style="text-align:center">20%</td>
+        <td style="text-align:center" class="bad">0.130</td>
+      </tr>
+      <tr>
+        <td><code style="font-size:11.5px">cardiffnlp/twitter-xlm-roberta-base</code></td>
+        <td style="text-align:center">26%</td>
+        <td style="text-align:center">69%</td>
+        <td style="text-align:center">5%</td>
+        <td style="text-align:center" class="med">0.143</td>
+      </tr>
+      <tr class="winner">
+        <td><strong><code style="font-size:11.5px">cardiffnlp/xlm-roberta-base-sentiment-multilingual</code> ✓</strong></td>
+        <td style="text-align:center">43%</td>
+        <td style="text-align:center">52%</td>
+        <td style="text-align:center">6%</td>
+        <td style="text-align:center" class="best">0.305</td>
+      </tr>
+    </table>
+    <div style="display:flex;gap:16px">
+      <div class="callout" style="flex:1">
+        <strong>lxyuan</strong> — praktično ne pozna nevtralnega razreda (0%). Neuporabno za naš task.
+      </div>
+      <div class="callout" style="flex:1">
+        <strong>twitter-xlm</strong> — stara validacija (n=30) je dala κ=0.35, nova (n=121) samo 0.14. Precenjen.
+      </div>
+      <div class="callout callout-green" style="flex:1">
+        <strong>xlm-roberta-multilingual</strong> — edini z realistično porazdelitvijo. Negative recall 35% — dejanska asimetrija je verjetno večja.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">7</div>
+</div>
+
+<!-- ══ 8. PARAGRAPH-LEVEL ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Sentiment analiza</div>
+    <div class="slide-title">Zakaj paragraph-level in ne samo lead?</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <ul class="bullets" style="gap:14px">
+        <li>Lead je pogosto kratek in ne zajame celotnega tona članka</li>
+        <li>Jedro in zaključek nosita dodaten sentiment signal</li>
+        <li><strong>Agregacija:</strong> aritmetična sredina odstavkov → <code>sentiment_raw</code></li>
+        <li>Preskočimo odstavke z &gt;25% besed v CAPS (rezultati: <em>KRKA – CIBONA 92:97</em>)</li>
+        <li>Preskočimo boilerplate: <em>Foto:, Preberite tudi:, ©</em></li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-val">+0.27</div>
+          <div class="metric-label">Povprečni<br>sentiment</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">45%</div>
+          <div class="metric-label">Pozitivnih<br>člankov</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">6%</div>
+          <div class="metric-label">Negativnih<br>člankov</div>
+        </div>
+      </div>
+      <div class="callout callout-green" style="margin-top:8px">
+        <strong>Opomba:</strong> pozitivni naklon (+0.27) je konsistenten z asimetrično hipotezo — ob slabih rezultatih ton ni enako intenzivno negativen.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">8</div>
+</div>
+
+<!-- ══ 9. LOWESS ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Glajenje signala</div>
+    <div class="slide-title">LOWESS z fiksnim oknom K=25 člankov</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <ul class="bullets" style="gap:14px">
+        <li>LOWESS: neparametrično lokalno uteženo glajenje — vsaka točka krivulje temelji na K najbližjih člankih</li>
+        <li><strong>Zakaj K=25 (fiksno število, ne dnevi)?</strong></li>
+      </ul>
+      <div class="callout" style="margin-top:8px">
+        S fiksnim oknom v dnevih bi Nogomet dobil 50+ člankov na točko, Biatlon pa 5 — <strong>različna statistična zanesljivost</strong>. K=25 zagotavlja enako zanesljivost ne glede na šport.
+      </div>
+      <ul class="bullets" style="margin-top:8px">
+        <li>Robovi krivulje se odrežejo (enostransko okno = nezanesljivo)</li>
+        <li>Nevtralni članki izločeni pred računanjem (manj šuma)</li>
+      </ul>
+    </div>
+    <div class="col" style="justify-content:center;gap:14px">
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:10px">Zaznava ekstremov</p>
+        <ul class="bullets">
+          <li><code style="font-size:11px">scipy.signal.find_peaks</code> s prominence pragom 8%</li>
+          <li>Vrh velja samo če je <strong>nad povprečjem</strong> krivulje</li>
+          <li>Dolina velja samo če je <strong>pod povprečjem</strong></li>
+        </ul>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:10px">Ključne besede</p>
+        <ul class="bullets">
+          <li>TF-IDF z background IDF: IDF fitamo na <em>vseh</em> člankih šport</li>
+          <li>Penalizira stalne besede (npr. "Planica" pri vsakem skoku)</li>
+          <li>Lematizacija z <code style="font-size:11px">lemmagen3</code> (slovenščina)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">9</div>
+</div>
+
+<!-- ══ 10. WORD CLOUD ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Ključne besede ekstremov</div>
+    <div class="slide-title">Generiranje word clouda — TF-IDF z background IDF</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <p style="font-size:14px;font-weight:600;color:#374151;margin-bottom:6px">Problem z navadnim TF-IDF</p>
+      <ul class="bullets" style="gap:10px">
+        <li>TF-IDF samo na kontekstnih člankih (±14 dni) → besede z visokim TF so tiste, ki so pogoste v tem oknu</li>
+        <li>A "Planica", "Prevc", "Kobayashi" so pogoste pri <em>vsakem</em> smučarsko-skakalnem ekstremu — niso specifične za ta dogodek</li>
+        <li>Rezultat: word cloud ki ne pove nič novega</li>
+      </ul>
+
+      <p style="font-size:14px;font-weight:600;color:#374151;margin-top:14px;margin-bottom:6px">Rešitev: dvostopenjski TF-IDF</p>
+      <ul class="bullets" style="gap:10px">
+        <li><strong>Fit IDF</strong> na <em>vseh</em> člankih šport → stalne besede dobijo nizek IDF (penalizacija)</li>
+        <li><strong>Transform</strong> samo kontekstnih člankov (±14 dni) → ostanejo besede edinstvene za ta ekstrem</li>
+        <li>Učinek: "Planica" dobi nizek score pri smučarskih skokih, izstopijo pa npr. "Granerud", "rekord", "padec"</li>
+      </ul>
+    </div>
+    <div class="col" style="justify-content:space-between">
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:10px">Obdelava besedila</p>
+        <ul class="bullets" style="gap:8px">
+          <li><strong>Lematizacija</strong> z <code style="font-size:11px">lemmagen3</code> (SL) — <em>iger → igra</em>, <em>tekmovalcev → tekmovalec</em></li>
+          <li>Filtriramo: števila, besede ≤ 2 znaka, razširjen seznam slovenskih stopwords</li>
+          <li>Top 20 besed po TF-IDF score</li>
+        </ul>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:10px">Normalizacija uteži za vizualizacijo</p>
+        <ul class="bullets" style="gap:8px">
+          <li>Surovi TF-IDF scores → normalizacija na <strong>[0.25, 1.0]</strong></li>
+          <li>Zagotavlja vsaj 4× vizualno razliko med prvo in zadnjo besedo</li>
+          <li>Velikost besede v word cloudu = teža; barva = tip ekstrema (zelena/rdeča)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">10</div>
+</div>
+
+<!-- ══ 11. EVALVACIJA ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Evalvacija</div>
+    <div class="slide-title">Rezultati in omejitve</div>
+  </div>
+  <div class="slide-body">
+    <div class="col">
+      <p style="font-size:14px;font-weight:600;color:#374151">Sentiment model (κ = 0.305)</p>
+      <ul class="bullets">
+        <li>Zmerno strinjanje — sprejemljivo za domeno brez fine-tuninga</li>
+        <li>Negative recall ~35%: model podcenjuje negativen sentiment</li>
+        <li>444 ročnih oznak zbranih z namensko Flask + terminal app</li>
+      </ul>
+      <div class="callout" style="margin-top:10px;background:#fefce8;border-left-color:#ca8a04">
+        <strong style="color:#a16207">Subjektivnost oznak:</strong> označevanje sentimenta je inherentno subjektivno — pri številnih člankih sam nisem bil prepričan v svojo oceno. Fine-tuning modela na takšnih oznakah bi model prilagodil <em>moji</em> subjektivni interpretaciji, ne dejanskemu sentimentu.
+      </div>
+      <div class="callout callout-green" style="margin-top:8px">
+        <strong>Zakaj je κ=0.305 vseeno dovolj:</strong> cilj je zaznati <em>trende</em> na stotinah člankov, ne klasificirati posamezni članek z visoko natančnostjo. Naključne napake se pri agregaciji povprečijo — signal ostane.
+      </div>
+    </div>
+    <div class="col">
+      <p style="font-size:14px;font-weight:600;color:#374151">Opažena asimetrija</p>
+      <div class="metrics" style="flex-direction:column;gap:10px">
+        <div class="metric" style="flex-direction:row;gap:16px;text-align:left;align-items:center">
+          <div class="metric-val" style="font-size:28px">+0.27</div>
+          <div class="metric-label" style="text-align:left">Povprečni sentiment<br>(lestvica −1 do +1)</div>
+        </div>
+        <div class="metric" style="flex-direction:row;gap:16px;text-align:left;align-items:center">
+          <div class="metric-val" style="font-size:28px">45 : 6</div>
+          <div class="metric-label" style="text-align:left">% pozitivnih vs negativnih<br>člankov</div>
+        </div>
+      </div>
+      <div class="callout callout-green" style="margin-top:8px;font-size:12.5px">
+        <strong>Naslednji korak:</strong> korelacija sentimenta z izidi tekem (FIS / UEFA API) za formalen dokaz asimetrije.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">11</div>
+</div>
+
+<!-- ══ 11. KAR NI DELOVALO 1 ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Preizkušeni pristopi</div>
+    <div class="slide-title">Kar ni delovalo — modeli</div>
+  </div>
+  <div class="slide-body" style="flex-direction:column;gap:14px">
+    <div style="display:flex;gap:14px">
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ lxyuan/distilbert-multilingual</p>
+        <ul class="bullets">
+          <li>Nevtralni razred praktično ne obstaja — model ga nikoli ne napove (~0%)</li>
+          <li>Vse gre v pozitivno ali negativno → κ=0.130, neuporabno</li>
+        </ul>
+      </div>
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ Stara validacija twitter-xlm (n=30)</p>
+        <ul class="bullets">
+          <li>Z n=30 ročnih oznak smo dobili κ=0.35 — zdelo se je dobro</li>
+          <li>Z n=121 oznakami κ pade na 0.143 — bil je artefakt majhnega vzorca</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px">
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ Utežena regresija odstavkov</p>
+        <ul class="bullets">
+          <li>Ideja: lead/uvodni/vmesni/zaključni odstavek imajo različno težo</li>
+          <li>Ridge regresija, 5-fold CV: κ=0.317 ± 0.221 vs baseline 0.308</li>
+          <li>Varianca ±0.221 ogromna — le 24 vzorcev/fold, prenizko za stabilen fit</li>
+        </ul>
+      </div>
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ Self-training brez pseudo-labelov</p>
+        <ul class="bullets">
+          <li>Prve oznake so prišle samo iz negotovih členkov → Rokomet, Odbojka sploh niso bili v training setu</li>
+          <li>Model je napovedal samo Nogomet (10.749 člankov!) in Košarka</li>
+          <li>Rešitev: pseudo-labeli top-150/šport iz originalne klasifikacije</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">12</div>
+</div>
+
+<!-- ══ 12. KAR NI DELOVALO 2 ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Preizkušeni pristopi</div>
+    <div class="slide-title">Kar ni delovalo — implementacija</div>
+  </div>
+  <div class="slide-body" style="flex-direction:column;gap:14px">
+    <div style="display:flex;gap:14px">
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ LOWESS s fiksno frakcijo (frac=0.08)</p>
+        <ul class="bullets">
+          <li>Za Nogomet (1885 člankov) okno vsebuje 150+ člankov → krivulja je ravna črta</li>
+          <li>Za Biatlon (199 člankov) isto okno vsebuje le 16 → krivulja poskakuje</li>
+          <li>Rešitev: K=25 fiksnih členkov, ne fiksna frakcija</li>
+        </ul>
+      </div>
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ TF-IDF brez background IDF</p>
+        <ul class="bullets">
+          <li>Navaden TF-IDF samo na kontekstnih člankah ±14 dni</li>
+          <li>Pri vsakem smučarsko-skakalnem ekstremu: "Planica", "Prevc", "Kobayashi" — prisotni v vsakem članku šport, niso specifični za ta ekstrem</li>
+          <li>Rešitev: IDF fitamo na vseh člankih šport, ne samo kontekstu</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px">
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ Zaznava ekstremov z argrelextrema</p>
+        <ul class="bullets">
+          <li>Lokalni ekstremi brez minimalnega praga → šum zazna kot ekstreme</li>
+          <li>Dip znotraj peaka zaznan kot dolina (lokalni minimum v naraščajoči krivulji)</li>
+          <li>Rešitev: <code style="font-size:11px">find_peaks</code> s prominence pragom 8%, vrh le če nad povprečjem</li>
+        </ul>
+      </div>
+      <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px">
+        <p style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:8px">✗ Sentiment samo na leadu (512 znakov)</p>
+        <ul class="bullets">
+          <li>Lead je pogosto samo 1–2 stavka, prerezani na 70–80 besed</li>
+          <li>Model XLM-RoBERTa podpira 512 <em>tokenov</em> (~350 besed) — ne znakov</li>
+          <li>Rešitev: paragraph-level analiza, limit 2000 znakov/odstavek</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">13</div>
+</div>
+
+<!-- ══ 13. ZAKLJUČEK ══ -->
+<div class="slide slide-dark">
+  <div class="slide-header" style="padding-top:32px">
+    <div class="slide-tag">Zaključek</div>
+    <div class="slide-title">Povzetek</div>
+  </div>
+  <div class="slide-body" style="align-items:center;gap:16px">
+    <div class="col">
+      <ul class="bullets" style="gap:14px">
+        <li>Zgradili pipeline od surovih HTML-jev do interaktivne vizualizacije</li>
+        <li>Klasifikacija 17.500 člankov v 12 športov z embeddingi + self-training LR</li>
+        <li>Primerjali 3 modele, izbrali na podlagi κ in distribucije razredov</li>
+        <li>LOWESS s fiksnim oknom K=25 za primerljive krivulje med šport</li>
+        <li>Prominence-based zaznava ekstremov brez threshold tuninga</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="badge badge-purple">sentence-transformers</span>
+        <span class="badge badge-purple">XLM-RoBERTa</span>
+        <span class="badge badge-blue">LogisticRegression</span>
+        <span class="badge badge-blue">TF-IDF</span>
+        <span class="badge badge-green">LOWESS</span>
+        <span class="badge badge-green">scipy.signal</span>
+        <span class="badge badge-yellow">D3.js</span>
+        <span class="badge badge-yellow">Flask</span>
+        <span class="badge badge-yellow">lemmagen3</span>
+      </div>
+      <div class="callout" style="margin-top:12px;background:#1e293b;border-left-color:#818cf8">
+        <span style="color:#94a3b8">Vir:</span> <strong style="color:#e2e8f0">RTV MMC</strong> <span style="color:#94a3b8">· Apr 2023 – Mar 2026 · 10.055 analiziranih člankov</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">14</div>
+</div>
+
+</body>
+</html>

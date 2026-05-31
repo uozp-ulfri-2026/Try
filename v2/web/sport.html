@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentiment — šport</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: 14px;
+    }
+
+    /* ── Layout ── */
+    .page {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.06), 0 4px 32px rgba(15,23,42,0.06);
+    }
+
+    /* ── Top bar ── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 28px;
+      height: 52px;
+      border-bottom: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+
+    .back-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: #0f172a; }
+
+    .sport-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      flex: 1;
+    }
+
+    .article-count {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #cbd5e1;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+    .legend-item.active { color: #64748b; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Chart section ── */
+    .chart-section {
+      flex-shrink: 0;
+      padding: 16px 28px 4px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .chart-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    #main-chart { width: 100%; display: block; overflow: visible; }
+
+    .axis text { fill: #94a3b8; font-size: 11px; font-family: inherit; }
+    .axis path, .axis line { stroke: #e2e8f0; }
+    .axis .domain { display: none; }
+
+    /* ── Detail section ── */
+    .detail-section {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+
+    /* Extremes list */
+    .extremes-panel {
+      width: 240px;
+      flex-shrink: 0;
+      border-right: 2px solid #e2e8f0;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-label {
+      padding: 12px 16px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #94a3b8;
+      border-bottom: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+
+    .extremes-list { overflow-y: auto; flex: 1; }
+
+    .extreme-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f8fafc;
+      transition: background 0.12s;
+    }
+    .extreme-item:hover { background: #e9eef5; }
+    .extreme-item.active {
+      background: #fff;
+      padding-left: 13px;
+      font-weight: 500;
+    }
+
+    .ei-icon { font-size: 11px; margin-top: 3px; flex-shrink: 0; }
+    .ei-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .ei-label {
+      font-size: 13px; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ei-date { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .ei-delta { font-size: 12px; font-weight: 600; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+    /* Context panel */
+    .context-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .empty-state .es-icons { font-size: 20px; color: #cbd5e1; letter-spacing: 6px; }
+    .empty-state .es-primary { font-size: 13px; font-weight: 600; color: #94a3b8; }
+    .empty-state .es-secondary { font-size: 11px; color: #cbd5e1; text-align: center; line-height: 1.6; }
+
+    .context-content { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+    .context-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+    .ctx-title { font-size: 14px; font-weight: 600; flex: 1; }
+    .ctx-date { font-size: 11px; color: #94a3b8; }
+    .ctx-count { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+
+    .context-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Word cloud */
+    .wordcloud-col {
+      width: 42%;
+      flex-shrink: 0;
+      border-right: 1px solid #f1f5f9;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .col-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #94a3b8;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+
+    .wordcloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      align-content: flex-start;
+      overflow: hidden;
+    }
+
+    .word {
+      display: inline-block;
+      line-height: 1.2;
+      cursor: default;
+      transition: opacity 0.15s;
+    }
+
+    /* Articles col */
+    .articles-col {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .article-card {
+      display: block;
+      padding: 9px 11px;
+      border: 1px solid #f1f5f9;
+      border-radius: 8px;
+      margin-bottom: 7px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.12s, background 0.12s;
+      cursor: pointer;
+    }
+    .article-card:hover { border-color: #e2e8f0; background: #fafafa; }
+    .article-card.highlighted { border-color: #e2e8f0; background: #f8fafc; }
+    .article-card { border-left-width: 3px; }
+
+    .ac-title { font-size: 13px; font-weight: 500; line-height: 1.4; margin-bottom: 5px; }
+    .ac-meta { display: flex; align-items: center; gap: 8px; }
+    .ac-date { font-size: 11px; color: #94a3b8; }
+
+    .badge {
+      font-size: 11px; font-weight: 600;
+      padding: 1px 6px; border-radius: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+    .badge-pos { background: #dcfce7; color: #16a34a; }
+    .badge-neg { background: #fee2e2; color: #dc2626; }
+    .badge-neu { background: #f1f5f9; color: #64748b; }
+
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 9px 13px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+      max-width: 280px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
+    .tooltip.visible { opacity: 1; }
+    .tt-title { font-size: 12px; font-weight: 500; line-height: 1.4; margin-bottom: 4px; color: #0f172a; }
+    .tt-date { font-size: 11px; color: #94a3b8; }
+    .tt-sent { font-size: 11px; margin-top: 4px; }
+    .tt-hint { font-size: 10px; color: #cbd5e1; margin-top: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="top-bar">
+    <a href="index.html" class="back-link">Vsi športi</a>
+    <h1 class="sport-title" id="sport-title">—</h1>
+    <span class="article-count" id="article-count"></span>
+    <div class="legend">
+      <div class="legend-item active" data-type="pos">
+        <div class="legend-dot" style="background:#22c55e"></div>Pozitiven
+      </div>
+      <div class="legend-item active" data-type="neu">
+        <div class="legend-dot" style="background:#94a3b8"></div>Nevtralen
+      </div>
+      <div class="legend-item active" data-type="neg">
+        <div class="legend-dot" style="background:#ef4444"></div>Negativen
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <div class="chart-label">Sentiment skozi čas</div>
+    <svg id="main-chart"></svg>
+  </div>
+
+  <div class="detail-section">
+    <div class="extremes-panel">
+      <div class="panel-label">Ekstremi</div>
+      <div class="extremes-list" id="extremes-list"></div>
+    </div>
+
+    <div class="context-panel" id="context-panel">
+      <div class="empty-state" id="empty-state">
+        <div class="es-icons">▲ ▼</div>
+        <div class="es-primary">Klikni vrh ali dolino</div>
+        <div class="es-secondary">Izberi trikotnik v grafu<br>ali ekstrem iz seznama levo</div>
+      </div>
+      <div class="context-content" id="context-content" style="display:none">
+        <div class="context-header">
+          <span class="ctx-title" id="ctx-title"></span>
+          <span class="ctx-date" id="ctx-date"></span>
+          <span class="ctx-count" id="ctx-count"></span>
+        </div>
+        <div class="context-body">
+          <div class="wordcloud-col">
+            <div class="col-label">Ključne besede</div>
+            <div class="wordcloud" id="wordcloud"></div>
+          </div>
+          <div class="articles-col">
+            <div class="col-label">Najboljši članki</div>
+            <div id="articles-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tt-title" id="tt-title"></div>
+  <div class="tt-date" id="tt-date"></div>
+  <div class="tt-sent" id="tt-sent"></div>
+  <div class="tt-hint">Klikni za članek</div>
+</div>
+
+<script>
+(async function () {
+// ── FETCH DATA ────────────────────────────────────────────────────────────────
+const PALETTE = ["#6366f1","#f59e0b","#ef4444","#22c55e","#ec4899","#06b6d4","#10b981","#f97316","#8b5cf6","#0ea5e9","#d946ef","#84cc16"];
+
+const params  = new URLSearchParams(window.location.search);
+const sportId = params.get('id') || 'smucarski-skoki';
+
+let sportData, sportsIndex;
+try {
+  [sportData, sportsIndex] = await Promise.all([
+    fetch(`../data/sport_${sportId}.json`).then(r => { if (!r.ok) throw r; return r.json(); }),
+    fetch('../data/sports.json').then(r => { if (!r.ok) throw r; return r.json(); }),
+  ]);
+} catch (e) {
+  document.querySelector('.page').innerHTML =
+    `<div style="padding:40px;color:#ef4444">Napaka pri nalaganju podatkov: ../data/sport_${sportId}.json</div>`;
+  return;
+}
+
+const sportIdx = sportsIndex.sports.findIndex(s => s.id === sportId);
+const cfg = {
+  name:  sportData.name,
+  color: PALETTE[sportIdx >= 0 ? sportIdx : 0],
+};
+
+document.title = `Sentiment — ${cfg.name}`;
+document.getElementById('sport-title').textContent = cfg.name;
+document.getElementById('article-count').textContent = `${sportData.n_articles} člankov`;
+
+// ── PARSE DATA ────────────────────────────────────────────────────────────────
+const parseDate = str => new Date(str + 'T12:00:00');
+
+const articles = sportData.articles.map(a => ({ ...a, date: parseDate(a.date) }));
+const smoothed  = sportData.smoothed.map(s => ({ date: parseDate(s.date), value: s.value }));
+
+const startDate = parseDate(sportData.date_range[0]);
+const endDate   = parseDate(sportData.date_range[1]);
+const totalDays = (endDate - startDate) / 86400e3;
+
+const articleMap = new Map(articles.map(a => [a.id, a]));
+
+const EVENTS = sportData.extremes.map(e => ({
+  ...e,
+  date: parseDate(e.date),
+  words: e.keywords.map(kw => ({
+    text: kw.word.charAt(0).toUpperCase() + kw.word.slice(1),
+    w: kw.weight,
+  })),
+  keywordLabel: e.keywords.slice(0, 3).map(k =>
+    k.word.charAt(0).toUpperCase() + k.word.slice(1)
+  ).join(' · '),
+  contextArticles: e.context_article_ids
+    .map(id => articleMap.get(id))
+    .filter(Boolean)
+    .sort((a, b) => e.type === 'peak'
+      ? b.sentiment - a.sentiment
+      : a.sentiment - b.sentiment)
+    .slice(0, 7),
+}));
+
+// ── (placeholder removed — podatki prihajajo iz JSON zgoraj) ──────────────────
+
+
+// ── CHART ─────────────────────────────────────────────────────────────────────
+const svgEl = document.getElementById('main-chart');
+const M = { top: 18, right: 24, bottom: 34, left: 46 };
+const CHART_H = 300;
+svgEl.setAttribute('height', CHART_H);
+
+const svg = d3.select('#main-chart');
+const allSentiments = articles.map(a => a.sentiment);
+const yPad = 0.12;
+const yMin = Math.max(-1, d3.min(allSentiments) - yPad);
+const yMax = Math.min( 1, d3.max(allSentiments) + yPad);
+
+const xPad  = new Date(+endDate + 21 * 86400e3); // 3 tedne dihanja za desni rob
+const xScale = d3.scaleTime().domain([startDate, xPad]).range([M.left, 100]);
+const yScale = d3.scaleLinear().domain([yMin, yMax]).range([CHART_H - M.bottom, M.top]);
+
+// Transparentni background za klik → odznači ekstrem
+const bgRect = svg.append('rect').attr('fill', 'transparent').attr('y', 0)
+  .on('click', () => { if (selectedId) selectExtreme(null); });
+
+// Layer groups (back → front)
+const gCtx      = svg.append('g');
+const gGrid     = svg.append('g');
+const gDots     = svg.append('g');
+const gCurve    = svg.append('g');
+const gMarkers  = svg.append('g');
+const gAxes     = svg.append('g');
+
+// Axes
+const xAxisG = gAxes.append('g').attr('class','axis')
+  .attr('transform', `translate(0,${CHART_H - M.bottom})`);
+const yAxisG = gAxes.append('g').attr('class','axis')
+  .attr('transform', `translate(${M.left},0)`);
+
+// Zero line
+const zeroLine = gGrid.append('line')
+  .attr('y1', yScale(0)).attr('y2', yScale(0))
+  .attr('stroke','#e2e8f0').attr('stroke-dasharray','4 3').attr('stroke-width',1);
+
+// Context window rect
+const ctxRect = gCtx.append('rect')
+  .attr('y', M.top).attr('height', CHART_H - M.top - M.bottom).attr('rx', 1)
+  .attr('opacity', 0).attr('pointer-events','none');
+
+// Smoothed curve
+const lineGen = d3.line().x(d => xScale(d.date)).y(d => yScale(d.value))
+  .curve(d3.curveCatmullRom.alpha(0.5));
+const curvePath = gCurve.append('path').datum(smoothed)
+  .attr('fill','none').attr('stroke', cfg.color).attr('stroke-width', 2.4)
+  .attr('stroke-linejoin','round').attr('stroke-linecap','round');
+
+// Article dots
+const dotColor = d => d.sentiment > 0.1 ? '#22c55e' : d.sentiment < -0.1 ? '#ef4444' : '#94a3b8';
+const dots = gDots.selectAll('circle').data(articles).join('circle')
+  .attr('cy', d => yScale(d.sentiment))
+  .attr('r', 3.5)
+  .attr('fill', dotColor)
+  .attr('opacity', 0.3)
+  .attr('stroke', '#fff').attr('stroke-width', 1)
+  .style('cursor','pointer');
+
+// Extreme markers
+function markerPos(ev) {
+  const cx = xScale(ev.date);
+  const nearest = smoothed.reduce((b, p) =>
+    Math.abs(p.date - ev.date) < Math.abs(b.date - ev.date) ? p : b);
+  const cy = yScale(nearest.value);
+  return { cx, cy };
+}
+
+const markerGroups = gMarkers.selectAll('g.em').data(EVENTS).join('g')
+  .attr('class','em').style('cursor','pointer');
+
+markerGroups.append('circle').attr('class','em-path');
+markerGroups.append('text').attr('class','em-label')
+  .attr('text-anchor','middle')
+  .style('font-size','12px').style('font-weight','600')
+  .style('fill', d => d.type === 'peak' ? '#16a34a' : '#dc2626')
+  .style('stroke', 'white').style('stroke-width', '3px').style('paint-order', 'stroke fill')
+  .style('pointer-events','none').style('opacity',0)
+  .each(function(d) {
+    d.keywords.slice(0, 3).forEach((k, i) => {
+      d3.select(this).append('tspan')
+        .attr('dy', i === 0 ? 0 : 15)
+        .text(k.word.charAt(0).toUpperCase() + k.word.slice(1));
+    });
+  });
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedId = null;
+let hoveredId  = null;
+let visibleTypes = { pos: true, neu: true, neg: true };
+
+// ── DRAW / RESIZE ─────────────────────────────────────────────────────────────
+function draw() {
+  const W = svgEl.parentElement.clientWidth;
+  svgEl.setAttribute('width', W);
+  bgRect.attr('width', W).attr('height', CHART_H);
+  xScale.range([M.left, W - M.right]);
+
+  const spanYears = (endDate - startDate) / (365.25 * 86400e3);
+  const tickEvery = spanYears > 3 ? d3.timeMonth.every(6) : d3.timeMonth.every(3);
+  xAxisG.call(d3.axisBottom(xScale).ticks(tickEvery)
+    .tickFormat(d3.timeFormat('%b %y')));
+  yAxisG.call(d3.axisLeft(yScale).ticks(7)
+    .tickFormat(d => d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1)));
+
+  zeroLine.attr('x1', M.left).attr('x2', W - M.right);
+
+  // Horizontalne mrežne linije
+  const gridVals = [-0.5, -0.25, 0.25, 0.5].filter(v => v > yMin && v < yMax);
+  gGrid.selectAll('.grid-h').data(gridVals).join('line')
+    .attr('class','grid-h')
+    .attr('x1', M.left).attr('x2', W - M.right)
+    .attr('y1', v => yScale(v)).attr('y2', v => yScale(v))
+    .attr('stroke','#f1f5f9').attr('stroke-width', 1);
+
+  curvePath.attr('d', lineGen);
+  dots.attr('cx', d => xScale(d.date));
+
+  // Redraw extreme markers
+  markerGroups.each(function(ev) {
+    const { cx, cy } = markerPos(ev);
+    const isActive = ev.id === selectedId || ev.id === hoveredId;
+    const r   = isActive ? 7 : 5;
+    const col = ev.type === 'peak' ? '#16a34a' : '#dc2626';
+    const dim = !selectedId || ev.id === selectedId || ev.id === hoveredId;
+
+    d3.select(this).select('.em-path')
+      .attr('cx', cx).attr('cy', cy).attr('r', r)
+      .attr('fill', 'rgba(255,255,255,0.75)')
+      .attr('stroke', col).attr('stroke-width', isActive ? 2.5 : 2)
+      .attr('opacity', dim ? 1 : 0.25);
+
+    const lh = 15, nLines = d3.select(this).select('.em-label').selectAll('tspan').size();
+    d3.select(this).select('.em-label')
+      .attr('x', cx)
+      .attr('y', ev.type === 'peak' ? cy + r + 16 : cy - r - 6 - (nLines - 1) * lh)
+      .selectAll('tspan').attr('x', cx).attr('dy', (_, i) => i === 0 ? 0 : lh);
+  });
+
+  // Context window
+  const activeId = selectedId || hoveredId;
+  if (activeId) {
+    const ev = EVENTS.find(e => e.id === activeId);
+    const dates = ev.contextArticles.map(a => +a.date);
+    const x0 = xScale(new Date(Math.min(...dates)));
+    const x1 = xScale(new Date(Math.max(...dates)));
+    const fillC = ev.type === 'peak' ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)';
+    const strkC = ev.type === 'peak' ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)';
+    ctxRect.attr('x', x0).attr('width', Math.max(0, x1 - x0))
+      .attr('fill', fillC).attr('stroke', strkC).attr('stroke-width', 1)
+      .attr('opacity', 1);
+  } else {
+    ctxRect.attr('opacity', 0);
+  }
+}
+
+// ── DOT HIGHLIGHT ─────────────────────────────────────────────────────────────
+function updateDots() {
+  const activeId = selectedId || hoveredId;
+  const ctxSet = activeId
+    ? new Set(EVENTS.find(e => e.id === activeId).contextArticles.map(a => a.id))
+    : null;
+
+  dots
+    .attr('opacity', d => {
+      const type = d.sentiment > 0.1 ? 'pos' : d.sentiment < -0.1 ? 'neg' : 'neu';
+      if (!visibleTypes[type]) return 0;
+      if (!ctxSet) return 0.3;
+      return ctxSet.has(d.id) ? 0.75 : 0.08;
+    })
+    .attr('r', d => {
+      if (!ctxSet) return 3.5;
+      return ctxSet.has(d.id) ? 4.5 : 3;
+    });
+}
+
+// ── SELECT EXTREME ────────────────────────────────────────────────────────────
+function selectExtreme(id) {
+  selectedId = id;
+
+  // Update list highlight
+  document.querySelectorAll('.extreme-item').forEach(el => {
+    const isActive = el.dataset.id === id;
+    el.classList.toggle('active', isActive);
+    const ev = EVENTS.find(e => e.id === el.dataset.id);
+    el.style.borderLeft = isActive
+      ? `3px solid ${ev.type === 'peak' ? '#16a34a' : '#dc2626'}`
+      : '';
+    el.style.paddingLeft = isActive ? '13px' : '';
+  });
+
+  // Update marker labels
+  markerGroups.select('.em-label')
+    .style('opacity', d => d.id === id ? 1 : 0)
+    .style('font-weight', d => d.id === id ? '600' : '400');
+
+  draw();
+  updateDots();
+
+  if (id) {
+    const ev = EVENTS.find(e => e.id === id);
+    showDetail(ev);
+  } else {
+    hideDetail();
+  }
+}
+
+// ── MARKER EVENTS ─────────────────────────────────────────────────────────────
+markerGroups
+  .on('mouseenter', function(_, ev) {
+    hoveredId = ev.id;
+    // Highlight list item
+    document.querySelectorAll('.extreme-item').forEach(el => {
+      if (el.dataset.id === ev.id) el.style.background = '#f1f5f9';
+    });
+    d3.select(this).select('.em-label').style('opacity', selectedId === ev.id ? 1 : 0.8);
+    draw(); updateDots();
+  })
+  .on('mouseleave', function(_, ev) {
+    hoveredId = null;
+    document.querySelectorAll('.extreme-item').forEach(el => {
+      if (el.dataset.id === ev.id && !el.classList.contains('active'))
+        el.style.background = '';
+    });
+    d3.select(this).select('.em-label').style('opacity', selectedId === ev.id ? 1 : 0);
+    draw(); updateDots();
+  })
+  .on('click', (event, ev) => { event.stopPropagation(); selectExtreme(ev.id === selectedId ? null : ev.id); });
+
+// ── DOT EVENTS ────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+dots
+  .on('mouseenter', function(event, d) {
+    d3.select(this).attr('r', 5.5).attr('stroke-width', 1.5);
+    const card = document.querySelector(`[data-article-id="${d.id}"]`);
+    if (card) card.classList.add('highlighted');
+    const col = d.sentiment > 0.1 ? '#16a34a' : d.sentiment < -0.1 ? '#dc2626' : '#64748b';
+    const sign = d.sentiment > 0 ? '+' : '';
+    document.getElementById('tt-title').textContent = d.title;
+    document.getElementById('tt-date').textContent = fmtDate(d.date);
+    document.getElementById('tt-sent').innerHTML =
+      `Sentiment: <strong style="color:${col}">${sign}${d.sentiment.toFixed(3)}</strong>`;
+    tooltip.classList.add('visible');
+    posTooltip(event);
+  })
+  .on('mousemove', posTooltip)
+  .on('mouseleave', function(event, d) {
+    const inCtx = selectedId &&
+      EVENTS.find(e => e.id === selectedId)?.contextArticles.some(a => a.id === d.id);
+    d3.select(this).attr('r', inCtx ? 4.5 : 3.5).attr('stroke-width', 1);
+    tooltip.classList.remove('visible');
+    const card = document.querySelector(`[data-article-id="${d.id}"]`);
+    if (card) card.classList.remove('highlighted');
+  })
+  .on('click', (event, d) => { event.stopPropagation(); window.open(d.url, '_blank', 'noopener'); });
+
+function posTooltip(event) {
+  const x = event.clientX, y = event.clientY;
+  const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+  let left = x + 14, top = y - th / 2;
+  if (left + tw > window.innerWidth - 10) left = x - tw - 14;
+  if (top < 6) top = 6;
+  if (top + th > window.innerHeight - 6) top = window.innerHeight - th - 6;
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top  = `${top}px`;
+}
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────────────────
+function hideDetail() {
+  document.getElementById('empty-state').style.display = 'flex';
+  document.getElementById('context-content').style.display = 'none';
+}
+
+function showDetail(ev) {
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('context-content').style.display = 'flex';
+
+  const icon = ev.type === 'peak' ? '▲' : '▼';
+  const col  = ev.type === 'peak' ? '#16a34a' : '#dc2626';
+  document.getElementById('ctx-title').innerHTML =
+    `<span style="color:${col};margin-right:5px">${icon}</span>${ev.label}`;
+
+  const ctxDates = ev.contextArticles.map(a => +a.date);
+  const d1 = new Date(Math.min(...ctxDates));
+  const d2 = new Date(Math.max(...ctxDates));
+  document.getElementById('ctx-date').textContent = `${fmtDate(d1)} – ${fmtDate(d2)}`;
+  document.getElementById('ctx-count').textContent = `${ev.contextArticles.length} člankov`;
+
+  renderWordCloud(ev.words, ev.type);
+  renderArticles(ev.contextArticles, ev);
+}
+
+function renderWordCloud(words, type) {
+  const baseColor = type === 'peak' ? '#16a34a' : '#dc2626';
+  const container = document.getElementById('wordcloud');
+  container.innerHTML = '';
+  if (!words.length) {
+    container.innerHTML = '<span style="color:#94a3b8;font-size:12px">Ni ključnih besed</span>';
+    return;
+  }
+  const maxW = Math.max(...words.map(w => w.w));
+  words.forEach(item => {
+    const el = document.createElement('span');
+    el.className = 'word';
+    el.textContent = item.text;
+    const norm = maxW > 0 ? item.w / maxW : 1;
+    el.style.fontSize   = `${10 + norm * 20}px`;
+    el.style.opacity    = `${0.4 + norm * 0.6}`;
+    el.style.fontWeight = norm > 0.7 ? '600' : '400';
+    el.style.color      = norm > 0.5 ? baseColor : '#64748b';
+    container.appendChild(el);
+  });
+}
+
+function renderArticles(arts, ev) {
+  const container = document.getElementById('articles-list');
+  container.innerHTML = '';
+  if (!arts.length) {
+    container.innerHTML = '<div style="color:#94a3b8;font-size:12px;padding:8px 0">Ni člankov v oknu.</div>';
+    return;
+  }
+
+  // highlight articles in same direction as event
+  arts.forEach(art => {
+    const a = document.createElement('a');
+    a.className = 'article-card';
+    a.href = art.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+
+    const type = art.sentiment > 0.1 ? 'pos' : art.sentiment < -0.1 ? 'neg' : 'neu';
+    const bClass = `badge badge-${type}`;
+    const sign = art.sentiment > 0 ? '+' : '';
+    const leftCol = type === 'pos' ? '#22c55e' : type === 'neg' ? '#ef4444' : '#e2e8f0';
+    a.style.borderLeftColor = leftCol;
+
+    a.innerHTML = `
+      <div class="ac-title">${art.title}</div>
+      <div class="ac-meta">
+        <span class="ac-date">${fmtDate(art.date)}</span>
+        <span class="${bClass}">${sign}${art.sentiment.toFixed(3)}</span>
+      </div>`;
+
+    a.dataset.articleId = art.id;
+
+    a.addEventListener('mouseenter', () => {
+      dots.filter(d => d.id === art.id)
+        .attr('r', 7).attr('opacity', 1).attr('stroke-width', 1.5);
+    });
+    a.addEventListener('mouseleave', () => updateDots());
+
+    container.appendChild(a);
+  });
+}
+
+// ── EXTREMES LIST ─────────────────────────────────────────────────────────────
+function renderExtremesList() {
+  const list = document.getElementById('extremes-list');
+  list.innerHTML = '';
+
+  [...EVENTS].sort((a, b) => a.date - b.date).forEach(ev => {
+    const item = document.createElement('div');
+    item.className = 'extreme-item';
+    item.dataset.id = ev.id;
+
+    const col  = ev.type === 'peak' ? '#16a34a' : '#dc2626';
+    const icon = ev.type === 'peak' ? '▲' : '▼';
+    const sign = ev.delta > 0 ? '+' : '';
+
+    item.innerHTML = `
+      <span class="ei-icon" style="color:${col}">${icon}</span>
+      <span class="ei-info">
+        <span class="ei-label">${ev.label}</span>
+        <span class="ei-date">${fmtDate(ev.date)}</span>
+      </span>
+      <span class="ei-delta" style="color:${col}">${sign}${ev.delta.toFixed(2)}</span>`;
+
+    item.addEventListener('click', () => selectExtreme(ev.id === selectedId ? null : ev.id));
+
+    item.addEventListener('mouseenter', () => {
+      if (hoveredId !== ev.id) { hoveredId = ev.id; draw(); updateDots(); }
+      markerGroups.filter(d => d.id === ev.id).select('.em-label').style('opacity', 1);
+    });
+    item.addEventListener('mouseleave', () => {
+      if (hoveredId === ev.id) { hoveredId = null; draw(); updateDots(); }
+      markerGroups.filter(d => d.id === ev.id).select('.em-label')
+        .style('opacity', selectedId === ev.id ? 1 : 0);
+    });
+
+    list.appendChild(item);
+  });
+}
+
+// ── LEGEND TOGGLES ────────────────────────────────────────────────────────────
+document.querySelectorAll('.legend-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const t = item.dataset.type;
+    visibleTypes[t] = !visibleTypes[t];
+    item.classList.toggle('active', visibleTypes[t]);
+    updateDots();
+  });
+});
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function fmtDate(d) {
+  return d.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderExtremesList();
+hideDetail();
+draw();
+new ResizeObserver(() => draw()).observe(svgEl.parentElement);
+
+})(); // end async IIFE
+</script>
+</body>
+</html>

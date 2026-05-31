@@ -30,8 +30,9 @@ SPORT_FILES = {
 }
 
 @st.cache_data
-def load_segments():
-    with open("segments.json", "r", encoding="utf-8") as f:
+def load_segments(paragraphs=False):
+    fname = "segments_paragraphs.json" if paragraphs else "segments.json"
+    with open(fname, "r", encoding="utf-8") as f:
         return json.load(f)
 
 @st.cache_data
@@ -51,7 +52,6 @@ def compute_tfidf(texts, n=8):
     except:
         return []
 
-segments_data = load_segments()
 sports = list(SPORT_FILES.keys())
 
 # --- Sidebar ---
@@ -63,6 +63,20 @@ metric = st.sidebar.radio(
     ["Uteženi sentiment", "% pozitivnih − % negativnih"],
     help="Uteženi sentiment: povprečje z utežmi. Ratio: delež pozitivnih minus negativnih člankov."
 )
+
+import os
+has_paragraph_data = os.path.exists("segments_paragraphs.json")
+if has_paragraph_data:
+    level = st.sidebar.radio(
+        "Nivo analize",
+        ["Članek (lead)", "Odstavek"],
+        help="Odstavek: sentiment agregiran iz vseh odstavkov članka. Zahteva segments_paragraphs.json.",
+    )
+    use_paragraphs = (level == "Odstavek")
+else:
+    use_paragraphs = False
+
+segments_data = load_segments(paragraphs=use_paragraphs)
 
 st.sidebar.divider()
 st.sidebar.subheader("O modelu")

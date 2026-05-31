@@ -2,10 +2,33 @@ import pandas as pd
 import numpy as np
 import json
 import sys
+import argparse
 import ruptures as rpt
 from scipy.signal import argrelextrema
 from sklearn.feature_extraction.text import TfidfVectorizer
 from statsmodels.nonparametric.smoothers_lowess import lowess
+
+# ── Argumenti ─────────────────────────────────────────────────────────────────
+parser = argparse.ArgumentParser(description="Precompute LOWESS + changepoints + TF-IDF → segments.json")
+parser.add_argument(
+    "--level",
+    choices=["article", "paragraph"],
+    default="article",
+    help=(
+        "article  = en sentiment na članek (lead), privzeto, kompatibilno s staro verzijo.\n"
+        "paragraph = sentiment agregiran iz odstavkov. Pričakuje {sport}_sentiment_paragraphs.csv."
+    ),
+)
+parser.add_argument(
+    "--output",
+    default=None,
+    help="Ime output JSON datoteke. Privzeto: segments.json (article) ali segments_paragraphs.json (paragraph).",
+)
+args, _ = parser.parse_known_args()
+
+LEVEL = args.level
+OUTPUT_JSON = args.output or ("segments.json" if LEVEL == "article" else "segments_paragraphs.json")
+print(f"Level: {LEVEL}  →  {OUTPUT_JSON}")
 
 SLO_STOPWORDS = [
     "in", "je", "so", "se", "na", "za", "da", "ki", "v", "z", "s", "ko",
@@ -18,9 +41,52 @@ SLO_STOPWORDS = [
     "niso", "ima", "imajo", "bil", "sta", "so", "je", "pa", "ne",
 ]
 
-def process_sport(csv_file, sport_name):
+def load_sentiment(csv_file, sport_name, level):
+    """
+    Naloži in pripravi sentiment DataFrame.
+
+    article level:
+      Prebere {sport}_sentiment.csv — en vrstica na članek.
+
+    paragraph level:
+      Prebere {sport}_sentiment_paragraphs.csv in agregira na članek:
+        - sentiment_raw   = mean odstavkov (enakovredna teža)
+        - sentiment_label = label z najvišjim deležem med odstavki (majority vote)
+      Ohrani polja id, url, date, lead (če obstaja) za kasnejši TF-IDF.
+    """
+    if level == "article":
+        df = pd.read_csv(csv_file, parse_dates=["date"])
+        return df.dropna(subset=["date", "sentiment_raw"]).sort_values("date")
+
+    # paragraph level — pričakovano ime datoteke
+    para_file = csv_file.replace("_sentiment.csv", "_sentiment_paragraphs.csv")
+    print(f"  Berem paragraph CSV: {para_file}")
+    para = pd.read_csv(para_file, parse_dates=["date"])
+    para = para.dropna(subset=["date", "sentiment_raw"])
+
+    # Agregiraj na nivo članka
+    def majority_label(series):
+        return series.value_counts().idxmax()
+
+    agg = para.groupby(["id", "url", "date"], as_index=False).agg(
+        sentiment_raw=("sentiment_raw", "mean"),
+        sentiment_label=("sentiment_label", majority_label),
+        n_paragraphs=("paragraph_idx", "count"),
+    )
+
+    # Dodaj 'lead' iz paragraph_idx==0 za TF-IDF (ni vedno prisoten v para CSV)
+    first_para = para[para["paragraph_idx"] == 0][["id", "paragraph_text"]].rename(
+        columns={"paragraph_text": "lead"}
+    )
+    agg = agg.merge(first_para, on="id", how="left")
+
+    print(f"  Agregiranih člankov: {len(agg)}, povp. odstavkov/članek: {agg['n_paragraphs'].mean():.1f}")
+    return agg.sort_values("date")
+
+
+def process_sport(csv_file, sport_name, level=LEVEL):
     print(f"\nObdelujem {sport_name}...")
-    sentiment = pd.read_csv(csv_file, parse_dates=["date"])
+    sentiment = load_sentiment(csv_file, sport_name, level)
     sentiment = sentiment.dropna(subset=["date", "sentiment_raw"]).sort_values("date")
 
     # Uteženo dnevno povprečje
@@ -212,12 +278,12 @@ sports = [
 output = {}
 for csv_file, name in sports:
     try:
-        output[name] = process_sport(csv_file, name)
+        output[name] = process_sport(csv_file, name, level=LEVEL)
         print(f"  Asimetrija: {output[name]['asymmetry']}")
     except Exception as e:
         print(f"  NAPAKA: {e}")
 
-with open("segments.json", "w", encoding="utf-8") as f:
+with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
     json.dump(output, f, ensure_ascii=False, indent=2)
 
-print("\nShranjeno: segments.json")
+print(f"\nShranjeno: {OUTPUT_JSON}")

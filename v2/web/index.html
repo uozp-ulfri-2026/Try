@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentiment v slovenskem športu</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* ── Split layout ── */
+    .split {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.06), 0 4px 32px rgba(15,23,42,0.06);
+    }
+
+    /* ── Zgornji panel (izbira) ── */
+    .top {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 40px 32px 24px;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .subtitle-dot { width: 4px; height: 4px; border-radius: 50%; background: #cbd5e1; }
+
+    #sports-list { border-top: 1px solid #f1f5f9; }
+
+    .sport-row {
+      display: block;
+      padding: 14px 0 10px;
+      border-bottom: 1px solid #f1f5f9;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.15s;
+    }
+
+    .sport-row.dimmed { opacity: 0.3; }
+
+    .sport-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .sport-name-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .select-add {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1;
+      color: #cbd5e1;
+      transition: color 0.15s, background 0.15s, transform 0.15s;
+    }
+    .sport-select-zone:hover .select-add { color: #475569; }
+
+    .sport-name {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .sport-count {
+      font-size: 12px;
+      color: #94a3b8;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Zgornja cona: primerjava */
+    .sport-select-zone {
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin: 0 -8px;
+      transition: background 0.12s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .sport-select-zone:hover { background: #f1f5f9; }
+
+
+    /* Spodnja cona: detail link */
+    .sport-chart-zone {
+      display: block;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.12s;
+      padding: 4px 0 2px;
+    }
+    .sport-chart-zone:hover { background: #f8fafc; }
+    .sport-chart-zone svg { display: block; overflow: visible; }
+
+    .chart-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: left;
+      padding: 3px 2px 0;
+      transition: color 0.15s;
+      pointer-events: none;
+    }
+    .sport-chart-zone:hover .chart-hint { color: #475569; }
+
+    /* ── Razdelilnik ── */
+    .divider {
+      flex-shrink: 0;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    /* ── Spodnji panel (primerjava) ── */
+    .bottom {
+      flex-shrink: 0;
+      height: 28dvh;
+      min-height: 160px;
+      padding: 16px 32px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .compare-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .compare-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    /* ── Chip transitions ── */
+    .chip { transition: opacity 0.15s; }
+
+    .compare-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px 3px 6px;
+      border-radius: 20px;
+      border: 1.5px solid var(--chip-color, #e2e8f0);
+      font-size: 12px;
+      font-weight: 500;
+      background: color-mix(in srgb, var(--chip-color, #e2e8f0) 12%, white);
+      color: color-mix(in srgb, var(--chip-color, #94a3b8) 80%, #0f172a);
+    }
+
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .chip-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      color: #94a3b8;
+      padding: 0 0 0 4px;
+    }
+
+    .chip-remove:hover { color: #0f172a; }
+
+    .btn-ymode {
+      margin-left: auto;
+      background: none;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      color: #94a3b8;
+      padding: 2px 8px;
+      flex-shrink: 0;
+      font-family: inherit;
+      transition: border-color 0.12s, color 0.12s;
+    }
+    .btn-ymode:hover { border-color: #94a3b8; color: #475569; }
+    .btn-ymode.fixed { border-color: #6366f1; color: #6366f1; }
+
+    .btn-clear {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+      color: #94a3b8;
+      padding: 2px 4px;
+      flex-shrink: 0;
+    }
+    .btn-clear:hover { color: #0f172a; }
+
+    #compare-chart {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+
+    #compare-chart svg { display: block; }
+
+    /* Empty state */
+    .empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .empty-state .es-icon { font-size: 22px; color: #cbd5e1; }
+    .empty-state .es-primary { font-size: 13px; font-weight: 600; color: #94a3b8; }
+    .empty-state .es-secondary { font-size: 11px; color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <div class="split">
+
+    <!-- Zgornji panel: izbira -->
+    <div class="top">
+      <header class="page-header">
+        <h1>Sentiment v slovenskem športu</h1>
+        <p class="subtitle">RTV MMC<span class="subtitle-dot"></span>2023–2026<span class="subtitle-dot"></span>Klikni šport za primerjavo</p>
+      </header>
+      <div id="sports-list"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Spodnji panel: primerjava -->
+    <div class="bottom">
+      <div class="compare-header">
+        <span class="compare-label">Primerjava</span>
+        <div id="compare-chips" class="compare-chips"></div>
+<button id="btn-ymode" class="btn-ymode">Y: auto</button>
+<button id="btn-clear" class="btn-clear" style="display:none">Počisti</button>
+      </div>
+      <div id="compare-chart">
+        <div class="empty-state" id="empty-state">
+          <div class="es-icon">+</div>
+          <div class="es-primary">Klikni + pri športu da ga dodaš</div>
+          <div class="es-secondary">Primerjaj do 5 športov hkrati</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  (async function () {
+
+    // ── Naloži podatke ────────────────────────────────────────────────────────
+    let data;
+    try {
+      data = await fetch('../data/sports.json').then(r => { if (!r.ok) throw r; return r.json(); });
+    } catch (e) {
+      document.querySelector('.top').innerHTML =
+        '<div style="padding:40px;color:#ef4444">Napaka pri nalaganju podatkov: ../data/sports.json</div>';
+      return;
+    }
+
+    const SPORTS = data.sports; // že sortirani po n_articles desc
+
+
+    const SPORT_MAP = Object.fromEntries(SPORTS.map(s => [s.id, s]));
+    // Vsak šport dobi svojo stalno barvo
+    const PALETTE = ["#6366f1","#f59e0b","#ef4444","#22c55e","#ec4899","#06b6d4","#10b981","#f97316","#8b5cf6","#0ea5e9","#d946ef","#84cc16"];
+    SPORTS.forEach((s, i) => { s.color = PALETTE[i % PALETTE.length]; });
+    const colorOf = id => SPORT_MAP[id].color;
+
+    const allVals  = SPORTS.flatMap(s => s.timeline);
+    const pad      = (d3.max(allVals) - d3.min(allVals)) * 0.18;
+    const Y_DOMAIN = [d3.min(allVals) - pad, d3.max(allVals) + pad];
+
+    const CHART_H = 72, BP_WIDTH = 28, BP_GAP = 20;
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let selectedIds = [];
+    let yMode = "auto"; // "auto" | "fixed"
+
+    function toggle(sport) {
+      const i = selectedIds.indexOf(sport.id);
+      if (i >= 0) selectedIds.splice(i, 1);
+      else { if (selectedIds.length >= 5) return; selectedIds.push(sport.id); }
+      updateRows();
+      updatePanel();
+    }
+
+    // ── Sport vrstice ─────────────────────────────────────────────────────────
+    const list = d3.select("#sports-list");
+
+    SPORTS.forEach(sport => {
+      const row = list.append("div")
+        .attr("class", "sport-row")
+        .attr("id", `row-${sport.id}`)
+        .attr("data-sport-id", sport.id);
+
+      // Zgornja cona: klik = primerjava
+      const sel = row.append("div").attr("class", "sport-select-zone")
+        .on("click", () => toggle(sport))
+        .on("mouseenter", () => highlightComparison(sport.id))
+        .on("mouseleave", clearHighlight);
+
+      const ng = sel.append("div").attr("class", "sport-name-group");
+      ng.append("span").attr("class", "select-add").attr("id", `add-${sport.id}`).text("+");
+      ng.append("span").attr("class", "sport-name").text(sport.name);
+
+      const right = sel.append("div").attr("class", "sport-name-group");
+      right.append("span").attr("class", "sport-count")
+        .text(sport.n_articles.toLocaleString("sl-SI") + " člankov");
+
+      // Spodnja cona: klik = podrobnosti
+      const chartZone = row.append("a")
+        .attr("class", "sport-chart-zone")
+        .attr("href", `sport.html?id=${sport.id}`);
+
+      const ro = new ResizeObserver(entries => {
+        const w = entries[0].contentRect.width;
+        if (w < 10) return;
+        d3.select(entries[0].target).selectAll("svg").remove();
+        drawChart(d3.select(entries[0].target), sport, w);
+      });
+      ro.observe(chartZone.node());
+      chartZone.append("div").attr("class", "chart-hint").text("Podrobno");
+    });
+
+    function updateRows() {
+      const any = selectedIds.length > 0;
+      SPORTS.forEach(s => {
+        const sel = selectedIds.includes(s.id);
+        d3.select(`#row-${s.id}`).classed("dimmed", any && !sel);
+
+        const icon = document.getElementById(`add-${s.id}`);
+        if (!icon) return;
+        if (sel) {
+          icon.textContent = "";
+          icon.style.background = s.color;
+          icon.style.width = "9px";
+          icon.style.height = "9px";
+          icon.style.color = "";
+        } else {
+          icon.textContent = "+";
+          icon.style.background = "";
+          icon.style.width = "";
+          icon.style.height = "";
+        }
+      });
+    }
+
+    // ── Primerjalni panel ─────────────────────────────────────────────────────
+    // ── Highlight ─────────────────────────────────────────────────────────────
+    function highlightComparison(id) {
+      const dim = el => el.dataset.sportId === id ? 1 : 0.15;
+      d3.selectAll(".chip").style("opacity", function() { return dim(this); });
+      d3.selectAll(".compare-curve").style("opacity", function() { return dim(this); });
+      d3.selectAll(".compare-bp").style("opacity", function() { return dim(this); });
+    }
+
+    function highlightAll(id) {
+      highlightComparison(id);
+      d3.selectAll(".sport-row")
+        .style("opacity", function() { return this.dataset.sportId === id ? 1 : 0.15; });
+    }
+
+    function clearHighlight() {
+      d3.selectAll(".chip, .compare-curve, .compare-bp").style("opacity", null);
+      d3.selectAll(".sport-row").style("opacity", null);
+    }
+
+    function scrollToSport(id) {
+      document.getElementById(`row-${id}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function updatePanel() {
+      document.getElementById("empty-state").style.display =
+        selectedIds.length === 0 ? "flex" : "none";
+      document.getElementById("btn-clear").style.display =
+        selectedIds.length === 0 ? "none" : "inline";
+
+      const chips = d3.select("#compare-chips");
+      chips.selectAll(".chip").remove();
+      selectedIds.forEach(id => {
+        const sport = SPORT_MAP[id];
+        const col   = colorOf(id);
+        const chip  = chips.append("div").attr("class", "chip")
+          .attr("data-sport-id", id)
+          .style("--chip-color", col)
+          .style("cursor", "pointer")
+          .on("click", () => scrollToSport(id))
+          .on("mouseenter", () => highlightAll(id))
+          .on("mouseleave", clearHighlight);
+        chip.append("span").attr("class", "chip-dot").style("background", col);
+        chip.append("span").text(sport.name);
+        chip.append("span").attr("class", "chip-remove").text("×")
+          .on("click", (event) => { event.stopPropagation(); toggle(sport); });
+      });
+
+      if (selectedIds.length > 0) drawCompareChart();
+      else d3.select("#compare-chart").selectAll("svg").remove();
+    }
+
+    // ── Primerjalni graf ──────────────────────────────────────────────────────
+    function drawCompareChart() {
+      const container = d3.select("#compare-chart");
+      container.selectAll("svg").remove();
+
+      const totalW = container.node().getBoundingClientRect().width;
+      const h      = container.node().getBoundingClientRect().height;
+      if (totalW < 10 || h < 10) return;
+
+      const n       = selectedIds.length;
+      const bpW     = 24;
+      const bpGap   = 10;
+      const bpAreaW = n * bpW + (n - 1) * bpGap + 28;
+      const yAxisW  = 36;
+      const sparkW  = totalW - bpAreaW - yAxisW;
+
+      // Y domain
+      const selDomain = yMode === "fixed" ? [-1, 1] : (() => {
+        const vals = selectedIds.flatMap(id =>
+          SPORT_MAP[id].timeline.filter(v => v !== null));
+        const pad = (d3.max(vals) - d3.min(vals)) * 0.15;
+        return [d3.min(vals) - pad, d3.max(vals) + pad];
+      })();
+
+      const svg    = container.append("svg").attr("width", totalW).attr("height", h);
+      const vPad   = 8;
+      const yScale = d3.scaleLinear().domain(selDomain).range([h - vPad, vPad]);
+      const y0     = yScale(0);
+
+      // Y os
+      svg.append("g").attr("transform", `translate(${yAxisW},0)`)
+        .call(d3.axisLeft(yScale).ticks(4)
+          .tickFormat(d => d > 0 ? `+${d.toFixed(2)}` : d.toFixed(2))
+          .tickSize(0))
+        .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll("text")
+          .style("font-size", "10px").style("fill", "#94a3b8")
+          .attr("dx", "-4"));
+
+      // Ničelna črta
+      svg.append("line")
+        .attr("x1", yAxisW).attr("x2", yAxisW + sparkW)
+        .attr("y1", y0).attr("y2", y0)
+        .attr("stroke", "#cbd5e1").attr("stroke-width", 1)
+        .attr("stroke-dasharray", "4,4");
+
+      // Krivulje
+      selectedIds.forEach(id => {
+        const sport  = SPORT_MAP[id];
+        const col    = colorOf(id);
+        const tl     = sport.timeline;
+        const xScale = d3.scaleLinear().domain([0, tl.length - 1]).range([yAxisW, yAxisW + sparkW]);
+        const line   = d3.line()
+          .defined(d => d !== null)
+          .x((d, i) => xScale(i)).y(d => yScale(d))
+          .curve(d3.curveCatmullRom.alpha(0.5));
+
+        // Vidna krivulja
+        svg.append("path").datum(tl)
+          .attr("class", "compare-curve").attr("data-sport-id", id)
+          .attr("d", line).attr("fill", "none")
+          .attr("stroke", col).attr("stroke-width", 2.2)
+          .attr("stroke-linejoin", "round")
+          .style("transition", "opacity 0.15s");
+
+        // Širša nevidna krivulja za lažji hover + scroll
+        svg.append("path").datum(tl)
+          .attr("d", line).attr("fill", "none")
+          .attr("stroke", "transparent").attr("stroke-width", 14)
+          .style("cursor", "pointer")
+          .on("mouseenter", () => highlightAll(id))
+          .on("mouseleave", clearHighlight)
+          .on("click", () => scrollToSport(id));
+      });
+
+      // Boxploti
+      selectedIds.forEach((id, i) => {
+        const sport = SPORT_MAP[id];
+        const col   = colorOf(id);
+        const bp    = sport.boxplot;
+        const bpX   = yAxisW + sparkW + 28 + i * (bpW + bpGap);
+        const bpCX  = bpX + bpW / 2;
+
+        const g = svg.append("g")
+          .attr("class", "compare-bp").attr("data-sport-id", id)
+          .style("transition", "opacity 0.15s").style("cursor", "pointer")
+          .on("mouseenter", () => highlightAll(id))
+          .on("mouseleave", clearHighlight)
+          .on("click", () => scrollToSport(id));
+
+        g.append("line")
+          .attr("x1", bpCX).attr("x2", bpCX)
+          .attr("y1", yScale(bp.max)).attr("y2", yScale(bp.min))
+          .attr("stroke", col).attr("stroke-width", 1.5).attr("opacity", 0.4);
+
+        [bp.min, bp.max].forEach(v => {
+          g.append("line")
+            .attr("x1", bpCX - 4).attr("x2", bpCX + 4)
+            .attr("y1", yScale(v)).attr("y2", yScale(v))
+            .attr("stroke", col).attr("stroke-width", 1.5).attr("opacity", 0.55);
+        });
+
+        g.append("rect")
+          .attr("x", bpX).attr("y", yScale(bp.q3))
+          .attr("width", bpW)
+          .attr("height", Math.max(1, yScale(bp.q1) - yScale(bp.q3)))
+          .attr("fill", col).attr("opacity", 0.15)
+          .attr("stroke", col).attr("stroke-width", 1.5).attr("rx", 3);
+
+        g.append("line")
+          .attr("x1", bpX).attr("x2", bpX + bpW)
+          .attr("y1", yScale(bp.median)).attr("y2", yScale(bp.median))
+          .attr("stroke", col).attr("stroke-width", 2.5)
+          .attr("stroke-linecap", "round");
+
+        // Hover target čez cel boxplot
+        g.append("rect")
+          .attr("x", bpX - 4).attr("y", yScale(bp.max) - 4)
+          .attr("width", bpW + 8)
+          .attr("height", yScale(bp.min) - yScale(bp.max) + 8)
+          .attr("fill", "transparent");
+      });
+    }
+
+    document.getElementById("btn-ymode").addEventListener("click", function() {
+      yMode = yMode === "auto" ? "fixed" : "auto";
+      this.textContent = yMode === "fixed" ? "Y: ±1" : "Y: auto";
+      this.classList.toggle("fixed", yMode === "fixed");
+      if (selectedIds.length > 0) drawCompareChart();
+    });
+
+    document.getElementById("btn-clear").addEventListener("click", () => {
+      selectedIds = [];
+      updateRows();
+      updatePanel();
+    });
+
+    // ResizeObserver za primerjalni graf
+    new ResizeObserver(() => {
+      if (selectedIds.length > 0) drawCompareChart();
+    }).observe(document.getElementById("compare-chart"));
+
+    // ── Sparkline + boxplot (spodnja cona) ───────────────────────────────────
+    function drawChart(container, sport, totalW) {
+      const tl     = sport.timeline;
+      const sparkW = totalW - BP_WIDTH - BP_GAP;
+      const h      = CHART_H;
+      const svg    = container.append("svg").attr("width", totalW).attr("height", h);
+      const yScale = d3.scaleLinear().domain(Y_DOMAIN).range([h, 0]);
+      const xScale = d3.scaleLinear().domain([0, tl.length - 1]).range([0, sparkW]);
+      const y0     = yScale(0);
+
+      svg.append("line")
+        .attr("x1", 0).attr("x2", sparkW)
+        .attr("y1", y0).attr("y2", y0)
+        .attr("stroke", "#cbd5e1").attr("stroke-width", 1)
+        .attr("stroke-dasharray", "4,4");
+
+      const line = d3.line()
+        .defined(d => d !== null)
+        .x((d, i) => xScale(i)).y(d => yScale(d))
+        .curve(d3.curveCatmullRom.alpha(0.5));
+
+      svg.append("path").datum(tl)
+        .attr("d", line).attr("fill", "none")
+        .attr("stroke", sport.color).attr("stroke-width", 2).attr("opacity", 0.8)
+        .attr("stroke-linejoin", "round");
+
+      const bp   = sport.boxplot;
+      const bpX  = sparkW + BP_GAP;
+      const bpCX = bpX + BP_WIDTH / 2;
+      const col  = sport.color;
+
+      svg.append("line")
+        .attr("x1", bpCX).attr("x2", bpCX)
+        .attr("y1", yScale(bp.max)).attr("y2", yScale(bp.min))
+        .attr("stroke", col).attr("stroke-width", 1.5).attr("opacity", 0.4);
+
+      [bp.min, bp.max].forEach(v => {
+        svg.append("line")
+          .attr("x1", bpCX - 4).attr("x2", bpCX + 4)
+          .attr("y1", yScale(v)).attr("y2", yScale(v))
+          .attr("stroke", col).attr("stroke-width", 1.5).attr("opacity", 0.55);
+      });
+
+      svg.append("rect")
+        .attr("x", bpX).attr("y", yScale(bp.q3))
+        .attr("width", BP_WIDTH)
+        .attr("height", Math.max(1, yScale(bp.q1) - yScale(bp.q3)))
+        .attr("fill", col).attr("opacity", 0.15)
+        .attr("stroke", col).attr("stroke-width", 1.5).attr("rx", 3);
+
+      svg.append("line")
+        .attr("x1", bpX).attr("x2", bpX + BP_WIDTH)
+        .attr("y1", yScale(bp.median)).attr("y2", yScale(bp.median))
+        .attr("stroke", col).attr("stroke-width", 2.5)
+        .attr("stroke-linecap", "round");
+    }
+
+  })();
+  </script>
+</body>
+</html>

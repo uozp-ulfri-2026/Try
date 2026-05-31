@@ -1,0 +1,24 @@
+services:
+  oznacevalnik:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+    environment:
+      PARQUET_PATH:    /data/sport_clanki.parquet
+      DB_PATH:         /data/articles.db
+      EXISTING_LABELS: /data/oznake.csv   # prazno ce ni obstojecih oznak
+      SECRET:          ""
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.oznacevalnik.rule=Host(`mmc.mihaperpar.com`)"
+      - "traefik.http.routers.oznacevalnik.entrypoints=websecure"
+      - "traefik.http.routers.oznacevalnik.tls.certresolver=letsencrypt"
+      - "traefik.http.services.oznacevalnik.loadbalancer.server.port=5050"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
+    name: traefik
