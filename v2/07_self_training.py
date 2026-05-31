@@ -76,14 +76,23 @@ df = pd.read_parquet(args.parquet)
 df["id"] = df["id"].astype(str)
 
 # ── Sestavi training set: ročne oznake + pseudo-labeli ────────────────────────
-# Pseudo-labeli: top N po confidence za vsak šport — garantira vse športe
-pseudo = (
+# Pseudo-labeli zapolnijo do pseudo_n na šport — za športe z veliko ročnimi
+# oznakami se pseudo ne dodajajo (ne bi radi učili na napačnih labelih)
+manual_counts = labels_df["sport"].value_counts().to_dict()
+sorted_by_conf = (
     df[df["sport"].isin(TARGET_SPORTS)]
     .sort_values("confidence", ascending=False)
-    .groupby("sport")
-    .head(args.pseudo_n)
-)[["id", "sport"]].copy()
-print(f"  Pseudo-labelov (top {args.pseudo_n}/šport): {len(pseudo)}")
+)
+pseudo_parts = []
+for sport in TARGET_SPORTS:
+    n_manual  = manual_counts.get(sport, 0)
+    n_pseudo  = max(0, args.pseudo_n - n_manual)
+    if n_pseudo == 0:
+        continue
+    chunk = sorted_by_conf[sorted_by_conf["sport"] == sport].head(n_pseudo)[["id", "sport"]]
+    pseudo_parts.append(chunk)
+pseudo = pd.concat(pseudo_parts, ignore_index=True) if pseudo_parts else pd.DataFrame(columns=["id", "sport"])
+print(f"  Pseudo-labelov (target {args.pseudo_n}/šport, zapolni primanjkljaj): {len(pseudo)}")
 print(f"  Porazdelitev pseudo:\n{pseudo['sport'].value_counts().to_string()}\n")
 
 # Ročne oznake prepišejo pseudo-labele za iste članke
@@ -171,3 +180,21 @@ print(f"Originalni parquet nespremenjen: {args.parquet}")
 print("\nNova porazdelitev:")
 print(df["sport"].value_counts().to_string())
 print(f"\nPovp. confidence: {df['confidence'].mean():.3f}")
+
+# ── Posodobi sport stolpec v sentiment parquetu ───────────────────────────────
+import glob
+sent_files = glob.glob("sentiment_xlm_roberta_base_sentiment_multilingual*.parquet")
+sent_files = [f for f in sent_files if "_paragraphs" not in f]
+if sent_files:
+    sent_path = sent_files[0]
+    print(f"\nPosodabljam sport v {sent_path}...")
+    sent = pd.read_parquet(sent_path)
+    new_sports = df[["id", "sport"]].copy()
+    new_sports["id"] = new_sports["id"].astype(str)
+    sent["id"] = sent["id"].astype(str)
+    sent = sent.drop(columns=["sport"]).merge(new_sports, on="id", how="left")
+    sent["sport"] = sent["sport"].fillna("Drugo")
+    sent.to_parquet(sent_path, index=False)
+    print(f"  Shranjeno: {sent_path}")
+else:
+    print("\nOpozorilo: sentiment parquet ni najden, preskoči posodobitev sporta.")

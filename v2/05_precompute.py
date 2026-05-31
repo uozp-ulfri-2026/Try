@@ -167,6 +167,10 @@ def detect_extremes(smoothed_dates, smoothed_values, df_sport, mean_val, backgro
         if len(ctx) == 0:
             continue
 
+        # Dolina zahteva vsaj en negativen članek v oknu
+        if etype == "valley" and not (ctx["sentiment_label"] == "negative").any():
+            continue
+
         context_ids = ctx["id"].astype(str).tolist()
 
         # Naslov najekstremnejšega clanka kot label
@@ -194,8 +198,17 @@ def detect_extremes(smoothed_dates, smoothed_values, df_sport, mean_val, backgro
                 vec.fit(bg_lemmatized)
 
                 # Transform samo kontekstne clanke
-                mat    = vec.transform(ctx_lemmatized)
-                scores = mat.mean(axis=0).A1
+                mat = vec.transform(ctx_lemmatized)
+
+                # Poudarek na člankih ki se ujemajo s tipom ekstrema
+                SENTIMENT_BOOST = 5.0
+                match_label = "positive" if etype == "peak" else "negative"
+                raw_w = np.array([
+                    SENTIMENT_BOOST if lbl == match_label else 1.0
+                    for lbl in ctx["sentiment_label"].values
+                ])
+                w = raw_w / raw_w.sum()
+                scores = mat.multiply(w[:, np.newaxis]).sum(axis=0).A1
                 words  = vec.get_feature_names_out()
 
                 # Top N po score

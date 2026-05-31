@@ -169,9 +169,9 @@
       justify-content: center;
       gap: 6px;
     }
-    .empty-state .es-icons { font-size: 20px; color: #cbd5e1; letter-spacing: 6px; }
-    .empty-state .es-primary { font-size: 13px; font-weight: 600; color: #94a3b8; }
-    .empty-state .es-secondary { font-size: 11px; color: #cbd5e1; text-align: center; line-height: 1.6; }
+    .empty-state .es-icons { font-size: 22px; color: #94a3b8; letter-spacing: 6px; }
+    .empty-state .es-primary { font-size: 15px; font-weight: 700; color: #475569; }
+    .empty-state .es-secondary { font-size: 12px; color: #94a3b8; text-align: center; line-height: 1.6; }
 
     .context-content { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
@@ -184,6 +184,8 @@
       flex-shrink: 0;
     }
     .ctx-title { font-size: 14px; font-weight: 600; flex: 1; }
+    .ctx-label-link { color: inherit; text-decoration: underline; text-decoration-color: #cbd5e1; text-underline-offset: 3px; }
+    .ctx-label-link:hover { text-decoration-color: #475569; }
     .ctx-date { font-size: 11px; color: #94a3b8; }
     .ctx-count { font-size: 11px; color: #94a3b8; white-space: nowrap; }
 
@@ -405,6 +407,10 @@ const EVENTS = sportData.extremes.map(e => ({
   keywordLabel: e.keywords.slice(0, 3).map(k =>
     k.word.charAt(0).toUpperCase() + k.word.slice(1)
   ).join(' · '),
+  labelUrl: (() => {
+    const prefix = e.label.substring(0, 28);
+    return articles.find(a => a.title && a.title.startsWith(prefix))?.url || null;
+  })(),
   contextArticles: e.context_article_ids
     .map(id => articleMap.get(id))
     .filter(Boolean)
@@ -589,6 +595,10 @@ function updateDots() {
       if (!ctxSet) return 0.3;
       return ctxSet.has(d.id) ? 0.75 : 0.08;
     })
+    .style('pointer-events', d => {
+      const type = d.sentiment > 0.1 ? 'pos' : d.sentiment < -0.1 ? 'neg' : 'neu';
+      return visibleTypes[type] ? 'all' : 'none';
+    })
     .attr('r', d => {
       if (!ctxSet) return 3.5;
       return ctxSet.has(d.id) ? 4.5 : 3;
@@ -608,6 +618,7 @@ function selectExtreme(id) {
       ? `3px solid ${ev.type === 'peak' ? '#16a34a' : '#dc2626'}`
       : '';
     el.style.paddingLeft = isActive ? '13px' : '';
+    if (isActive) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
   // Update marker labels
@@ -699,8 +710,11 @@ function showDetail(ev) {
 
   const icon = ev.type === 'peak' ? '▲' : '▼';
   const col  = ev.type === 'peak' ? '#16a34a' : '#dc2626';
+  const labelHtml = ev.labelUrl
+    ? `<a href="${ev.labelUrl}" target="_blank" rel="noopener" class="ctx-label-link">${ev.label}</a>`
+    : ev.label;
   document.getElementById('ctx-title').innerHTML =
-    `<span style="color:${col};margin-right:5px">${icon}</span>${ev.label}`;
+    `<span style="color:${col};margin-right:5px">${icon}</span>${labelHtml}`;
 
   const ctxDates = ev.contextArticles.map(a => +a.date);
   const d1 = new Date(Math.min(...ctxDates));

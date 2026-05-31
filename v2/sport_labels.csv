@@ -817,3 +817,248 @@ id,sport,original_sport,confidence,conf_gap
 681287,Tenis,Tenis,0.908,0.0051
 717437,Tenis,Tenis,0.8291,0.0051
 681727,Tenis,Tenis,0.5119,0.0053
+736670,Smučarski skoki,Smučarski skoki,0.5935,0.0001
+736985,Smučarski skoki,Smučarski skoki,0.5158,0.0002
+777524,Smučarski skoki,Smučarski skoki,0.7997,0.0002
+697368,Smučarski skoki,Smučarski skoki,0.4872,0.0003
+699447,Smučarski skoki,Smučarski skoki,0.8972,0.0005
+777770,Drugo,Smučarski skoki,0.2307,0.0005
+717893,Drugo,Smučarski skoki,0.3225,0.0006
+701025,Drugo,Smučarski skoki,0.2556,0.0006
+756705,Drugo,Smučarski skoki,0.3514,0.0007
+741000,Smučarski skoki,Smučarski skoki,0.65,0.0008
+750372,Športno plezanje,Smučarski skoki,0.5277,0.0009
+701148,Smučarski skoki,Smučarski skoki,0.6438,0.0009
+702554,Smučarski skoki,Smučarski skoki,0.5655,0.001
+739294,Smučarski skoki,Smučarski skoki,0.4189,0.0011
+769084,Smučarski skoki,Smučarski skoki,0.8023,0.0011
+701273,Smučarski skoki,Smučarski skoki,0.831,0.0011
+769075,Smučarski skoki,Smučarski skoki,0.318,0.0012
+670486,Športno plezanje,Smučarski skoki,0.7272,0.0013
+697207,Smučarski skoki,Smučarski skoki,0.8223,0.0015
+720759,Kolesarstvo,Smučarski skoki,0.3311,0.0015
+765726,Smučarski skoki,Smučarski skoki,0.8958,0.0017
+702453,Smučarski skoki,Smučarski skoki,0.8828,0.0017
+729127,Smučarski skoki,Smučarski skoki,0.7392,0.0017
+766370,Smučarski skoki,Smučarski skoki,0.4058,0.0017
+702650,Smučarski skoki,Smučarski skoki,0.6259,0.0018
+727556,Smučarski skoki,Smučarski skoki,0.6904,0.0019
+758144,Hokej na ledu,Smučarski skoki,0.2176,0.002
+731872,Smučarski skoki,Smučarski skoki,0.8508,0.0022
+734520,Smučarski skoki,Smučarski skoki,0.8472,0.0022
+701022,Drugo,Smučarski skoki,0.1834,0.0025
+777784,Drugo,Smučarski skoki,0.2085,0.0025
+767112,Smučarski skoki,Smučarski skoki,0.7789,0.0026
+670683,Tenis,Smučarski skoki,0.1901,0.0027
+736744,Smučarski skoki,Smučarski skoki,0.476,0.0028
+730600,Smučarski skoki,Smučarski skoki,0.6022,0.0028
+775586,Smučarski skoki,Smučarski skoki,0.6283,0.0028
+736551,Smučarski skoki,Smučarski skoki,0.8819,0.0029
+775414,Smučarski skoki,Smučarski skoki,0.8822,0.0029
+768412,Smučarski skoki,Smučarski skoki,0.3727,0.0029
+672243,Športno plezanje,Smučarski skoki,0.4565,0.003
+726246,Tenis,Smučarski skoki,0.2175,0.0033
+697160,Smučarski skoki,Smučarski skoki,0.8203,0.0034
+723375,Športno plezanje,Smučarski skoki,0.2344,0.0034
+771880,Smučarski skoki,Smučarski skoki,0.7927,0.0034
+701864,Smučarski skoki,Smučarski skoki,0.4705,0.0035
+731989,Smučarski skoki,Smučarski skoki,0.8681,0.0035
+736742,Smučarski skoki,Smučarski skoki,0.5053,0.0035
+701418,Smučarski skoki,Smučarski skoki,0.8637,0.0037
+777819,Smučarski skoki,Smučarski skoki,0.8561,0.0037
+702610,Smučarski skoki,Smučarski skoki,0.517,0.0037
+754359,Smučarski skoki,Alpsko smučanje,0.6621,0.0
+772657,Alpsko smučanje,Alpsko smučanje,0.5114,0.0004
+730795,Alpsko smučanje,Alpsko smučanje,0.8654,0.0004
+671285,Drugo,Alpsko smučanje,0.4911,0.0005
+773175,Alpsko smučanje,Alpsko smučanje,0.7744,0.0005
+767448,Biatlon,Alpsko smučanje,0.3386,0.0006
+694672,Alpsko smučanje,Alpsko smučanje,0.4132,0.0007
+773067,Alpsko smučanje,Alpsko smučanje,0.5573,0.0008
+772238,Smučarski skoki,Alpsko smučanje,0.4412,0.0008
+696872,Alpsko smučanje,Alpsko smučanje,0.5884,0.0009
+689763,Smučarski skoki,Alpsko smučanje,0.7316,0.0009
+716468,Drugo,Alpsko smučanje,0.686,0.001
+730354,Drugo,Alpsko smučanje,0.3941,0.001
+695023,Alpsko smučanje,Alpsko smučanje,0.8331,0.0011
+729096,Drugo,Alpsko smučanje,0.289,0.0012
+688232,Alpsko smučanje,Alpsko smučanje,0.7173,0.0013
+776226,Alpsko smučanje,Alpsko smučanje,0.3982,0.0013
+685013,Alpsko smučanje,Alpsko smučanje,0.8642,0.0014
+767110,Alpsko smučanje,Alpsko smučanje,0.7091,0.0014
+732802,Drugo,Alpsko smučanje,0.23,0.0014
+696355,Drugo,Alpsko smučanje,0.6291,0.0016
+731267,Alpsko smučanje,Alpsko smučanje,0.4173,0.0016
+773972,Alpsko smučanje,Alpsko smučanje,0.8396,0.0019
+741831,Drugo,Alpsko smučanje,0.5468,0.002
+736044,Smučarski skoki,Alpsko smučanje,0.465,0.0022
+716345,Drugo,Alpsko smučanje,0.4832,0.0023
+775508,Alpsko smučanje,Alpsko smučanje,0.539,0.0024
+693967,Alpsko smučanje,Alpsko smučanje,0.6992,0.0025
+675941,Drugo,Alpsko smučanje,0.6737,0.0025
+739581,Drugo,Alpsko smučanje,0.141,0.0026
+695762,Drugo,Alpsko smučanje,0.4615,0.0026
+746984,Drugo,Alpsko smučanje,0.2615,0.0029
+694188,Alpsko smučanje,Alpsko smučanje,0.3919,0.0029
+772605,Smučarski skoki,Alpsko smučanje,0.5977,0.0031
+772807,Alpsko smučanje,Alpsko smučanje,0.7816,0.0031
+770977,Alpsko smučanje,Alpsko smučanje,0.5443,0.0031
+740501,Alpsko smučanje,Alpsko smučanje,0.772,0.0033
+688506,Smučarski skoki,Alpsko smučanje,0.576,0.0033
+772732,Alpsko smučanje,Alpsko smučanje,0.5712,0.0035
+737575,Alpsko smučanje,Alpsko smučanje,0.708,0.0035
+734833,Alpsko smučanje,Alpsko smučanje,0.9088,0.0036
+673737,Drugo,Alpsko smučanje,0.588,0.0036
+744237,Alpsko smučanje,Alpsko smučanje,0.6777,0.0036
+755971,Drugo,Alpsko smučanje,0.3996,0.0036
+714057,Drugo,Alpsko smučanje,0.8691,0.0037
+771899,Drugo,Alpsko smučanje,0.7682,0.004
+691397,Drugo,Alpsko smučanje,0.7947,0.0042
+773914,Biatlon,Alpsko smučanje,0.267,0.0043
+729187,Alpsko smučanje,Alpsko smučanje,0.5651,0.0045
+725132,Alpsko smučanje,Alpsko smučanje,0.7939,0.0046
+769597,Alpsko smučanje,Alpsko smučanje,0.6379,0.0047
+697201,Alpsko smučanje,Alpsko smučanje,0.7166,0.0047
+741475,Alpsko smučanje,Alpsko smučanje,0.6702,0.0047
+672479,Alpsko smučanje,Alpsko smučanje,0.9076,0.0048
+733326,Alpsko smučanje,Alpsko smučanje,0.485,0.0049
+772590,Alpsko smučanje,Alpsko smučanje,0.1776,0.0049
+766215,Alpsko smučanje,Alpsko smučanje,0.3436,0.0049
+766437,Drugo,Alpsko smučanje,0.5717,0.005
+706098,Alpsko smučanje,Alpsko smučanje,0.6877,0.005
+769738,Alpsko smučanje,Alpsko smučanje,0.606,0.005
+722978,Atletika,Atletika,0.2533,0.0028
+769879,Drugo,Atletika,0.3291,0.0035
+676606,Nogomet,Atletika,0.3391,0.0036
+720021,Atletika,Atletika,0.4329,0.0041
+691183,Atletika,Atletika,0.4954,0.0053
+750337,Atletika,Atletika,0.2838,0.0061
+777377,Nogomet,Atletika,0.2586,0.0061
+715613,Atletika,Atletika,0.775,0.0063
+738906,Atletika,Atletika,0.8833,0.0063
+767102,Drugo,Atletika,0.2489,0.0064
+671977,Atletika,Atletika,0.6426,0.0064
+777474,Atletika,Atletika,0.8079,0.0066
+677241,Kolesarstvo,Atletika,0.2805,0.0069
+752405,Atletika,Atletika,0.8019,0.0069
+680950,Atletika,Atletika,0.8283,0.0069
+717410,Atletika,Atletika,0.7014,0.0071
+711374,Atletika,Atletika,0.8373,0.0072
+753786,Atletika,Atletika,0.4997,0.0076
+722481,Atletika,Atletika,0.4604,0.0076
+710375,Atletika,Atletika,0.9303,0.0079
+739287,Nogomet,Atletika,0.3119,0.0079
+758030,Nogomet,Atletika,0.3254,0.008
+720401,Atletika,Atletika,0.7527,0.0081
+728483,Atletika,Atletika,0.549,0.0082
+756635,Atletika,Atletika,0.6615,0.0086
+708828,Atletika,Atletika,0.1956,0.0089
+711852,Drugo,Atletika,0.3295,0.0089
+774743,Nogomet,Atletika,0.2356,0.009
+758243,Atletika,Atletika,0.9271,0.0092
+698240,Atletika,Atletika,0.9122,0.0092
+738717,Atletika,Atletika,0.8242,0.0095
+758660,Nogomet,Atletika,0.4233,0.0096
+736537,Atletika,Atletika,0.3881,0.0102
+675923,Atletika,Atletika,0.2339,0.0114
+757534,Atletika,Atletika,0.5612,0.0115
+721456,Atletika,Atletika,0.9383,0.0121
+681887,Atletika,Atletika,0.7886,0.0122
+763802,Drugo,Atletika,0.5385,0.0127
+742754,Atletika,Atletika,0.3662,0.0127
+741672,Atletika,Atletika,0.6292,0.0129
+757349,Atletika,Atletika,0.4374,0.0129
+677237,Atletika,Atletika,0.5156,0.013
+698766,Atletika,Atletika,0.4841,0.0131
+717586,Atletika,Atletika,0.5461,0.0132
+704214,Atletika,Atletika,0.9681,0.0132
+711142,Atletika,Atletika,0.7608,0.0133
+725721,Atletika,Atletika,0.3792,0.0135
+734576,Nogomet,Atletika,0.6412,0.0136
+771977,Nogomet,Atletika,0.1598,0.0139
+722682,Nogomet,Atletika,0.2308,0.014
+711175,Atletika,Atletika,0.5478,0.0141
+742605,Atletika,Atletika,0.8835,0.0145
+762017,Atletika,Atletika,0.8472,0.0149
+698452,Atletika,Atletika,0.6833,0.0152
+700179,Atletika,Atletika,0.566,0.0153
+699723,Atletika,Atletika,0.3664,0.0155
+671962,Nogomet,Atletika,0.3172,0.0156
+757680,Atletika,Atletika,0.9298,0.0159
+738878,Drugo,Alpsko smučanje,0.2486,0.0014
+775744,Alpsko smučanje,Alpsko smučanje,0.5161,0.0037
+695535,Alpsko smučanje,Alpsko smučanje,0.7618,0.0051
+735321,Alpsko smučanje,Alpsko smučanje,0.8662,0.0052
+735312,Alpsko smučanje,Alpsko smučanje,0.789,0.0055
+672012,Drugo,Alpsko smučanje,0.4049,0.0058
+688404,Alpsko smučanje,Alpsko smučanje,0.9108,0.0059
+729292,Alpsko smučanje,Alpsko smučanje,0.846,0.006
+708313,Alpsko smučanje,Alpsko smučanje,0.9467,0.006
+709227,Alpsko smučanje,Alpsko smučanje,0.7208,0.0062
+687431,Alpsko smučanje,Alpsko smučanje,0.8477,0.0062
+667557,Alpsko smučanje,Alpsko smučanje,0.3377,0.0062
+686513,Alpsko smučanje,Alpsko smučanje,0.5618,0.0067
+745340,Alpsko smučanje,Alpsko smučanje,0.7513,0.0071
+734512,Alpsko smučanje,Alpsko smučanje,0.5002,0.0071
+691989,Alpsko smučanje,Alpsko smučanje,0.8471,0.0073
+769577,Alpsko smučanje,Alpsko smučanje,0.5004,0.0074
+771126,Alpsko smučanje,Alpsko smučanje,0.531,0.0076
+771962,Alpsko smučanje,Alpsko smučanje,0.7219,0.0079
+727433,Alpsko smučanje,Alpsko smučanje,0.7754,0.0082
+746007,Alpsko smučanje,Alpsko smučanje,0.4998,0.0083
+775634,Alpsko smučanje,Alpsko smučanje,0.7544,0.0086
+706485,Smučarski skoki,Alpsko smučanje,0.3717,0.0086
+731760,Alpsko smučanje,Alpsko smučanje,0.5159,0.0086
+693002,Alpsko smučanje,Alpsko smučanje,0.6638,0.0092
+722546,Alpsko smučanje,Alpsko smučanje,0.4056,0.0092
+668569,Kolesarstvo,Alpsko smučanje,0.1988,0.0093
+775076,Alpsko smučanje,Alpsko smučanje,0.8815,0.0095
+692999,Alpsko smučanje,Alpsko smučanje,0.644,0.0095
+769366,Alpsko smučanje,Alpsko smučanje,0.738,0.0102
+767624,Alpsko smučanje,Alpsko smučanje,0.6045,0.0103
+737809,Alpsko smučanje,Alpsko smučanje,0.4281,0.0104
+740379,Alpsko smučanje,Alpsko smučanje,0.6752,0.0105
+731795,Alpsko smučanje,Alpsko smučanje,0.5367,0.0106
+738142,Alpsko smučanje,Alpsko smučanje,0.8662,0.0106
+770664,Alpsko smučanje,Alpsko smučanje,0.3027,0.0106
+774736,Alpsko smučanje,Alpsko smučanje,0.8269,0.0108
+727084,Alpsko smučanje,Alpsko smučanje,0.8795,0.0108
+767857,Alpsko smučanje,Alpsko smučanje,0.557,0.0109
+729119,Alpsko smučanje,Alpsko smučanje,0.6452,0.0113
+732883,Alpsko smučanje,Alpsko smučanje,0.3391,0.0115
+771862,Alpsko smučanje,Alpsko smučanje,0.9141,0.012
+695316,Alpsko smučanje,Alpsko smučanje,0.6455,0.0121
+735642,Alpsko smučanje,Alpsko smučanje,0.9377,0.0125
+771485,Alpsko smučanje,Alpsko smučanje,0.9293,0.0131
+733022,Alpsko smučanje,Alpsko smučanje,0.4758,0.0131
+772757,Alpsko smučanje,Alpsko smučanje,0.9079,0.0131
+774932,Drugo,Alpsko smučanje,0.4661,0.0132
+693916,Alpsko smučanje,Alpsko smučanje,0.586,0.0132
+721201,Hokej na ledu,Alpsko smučanje,0.1602,0.0132
+767426,Alpsko smučanje,Alpsko smučanje,0.7685,0.0133
+772269,Alpsko smučanje,Alpsko smučanje,0.4153,0.0133
+690595,Alpsko smučanje,Alpsko smučanje,0.6566,0.0133
+755841,Drugo,Alpsko smučanje,0.5996,0.0134
+730696,Drugo,Alpsko smučanje,0.271,0.0135
+737360,Alpsko smučanje,Alpsko smučanje,0.8006,0.0135
+734087,Alpsko smučanje,Alpsko smučanje,0.675,0.0136
+768074,Alpsko smučanje,Alpsko smučanje,0.7897,0.0136
+767859,Alpsko smučanje,Alpsko smučanje,0.8823,0.0137
+766476,Alpsko smučanje,Alpsko smučanje,0.7433,0.0142
+767132,Alpsko smučanje,Alpsko smučanje,0.6731,0.0142
+758133,Nogomet,Biatlon,0.1977,0.0015
+733430,Biatlon,Biatlon,0.5502,0.0027
+676691,Kolesarstvo,Biatlon,0.502,0.0034
+728591,Biatlon,Biatlon,0.7739,0.0035
+707741,Kolesarstvo,Biatlon,0.2811,0.0036
+729798,Drugo,Biatlon,0.2829,0.0036
+746108,Kolesarstvo,Biatlon,0.52,0.0038
+728623,Košarka,Rokomet,0.6539,0.0001
+715347,Nogomet,Rokomet,0.2395,0.0002
+714947,Nogomet,Rokomet,0.4407,0.0003
+712013,Nogomet,Rokomet,0.3819,0.0004
+736718,Rokomet,Rokomet,0.5289,0.0004
+763860,Rokomet,Rokomet,0.7086,0.0005
+722174,Košarka,Rokomet,0.4077,0.0006
+770326,Rokomet,Rokomet,0.7591,0.0006
+667821,Košarka,Rokomet,0.2836,0.0006
