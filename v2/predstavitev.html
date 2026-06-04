@@ -922,5 +922,111 @@
   <div class="slide-num">14</div>
 </div>
 
+
+<!-- ══ 15. SESSION — DIAGNOZA ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Session · Junij 2026</div>
+    <div class="slide-title">Diagnoza klasifikatorja — primerjava 7 pristopov</div>
+  </div>
+  <div class="slide-body" style="gap:20px">
+    <div class="col" style="flex:1.1">
+      <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">Ugotovljene težave</p>
+      <ul class="bullets" style="gap:10px">
+        <li><strong>Pseudo-labeli iz cosine similarity škodijo:</strong> 0.832 → 0.791 — napake iz koraka 01 se prenesejo kot resnica v LR trening</li>
+        <li><strong>"Drugo" kot trening razred je problem:</strong> precision 0.58 — kategorija je heterogena, model se je ne more naučiti</li>
+        <li><strong>C=1 preveč regulariziran</strong> za 384-dim embedding prostor; C=5 bistveno boljši</li>
+        <li><strong>Keyword features so kritične:</strong> brez njih accuracy pade z 0.83 na 0.67 (−16 pp)</li>
+      </ul>
+      <div class="callout" style="margin-top:10px">
+        <strong>Rešitev za Drugo:</strong> odstranimo ga iz trening razredov — namesto tega prag zaupanja 0.35. Če model ni zanesljiv, gre artikel v "Drugo" samodejno.
+      </div>
+    </div>
+    <div class="col" style="flex:1">
+      <table>
+        <tr>
+          <th>Pristop</th>
+          <th style="text-align:center">CV acc</th>
+        </tr>
+        <tr>
+          <td>LR C=1, ročne + pseudo</td>
+          <td style="text-align:center" class="bad">0.791</td>
+        </tr>
+        <tr>
+          <td>LR C=1, samo ročne</td>
+          <td style="text-align:center" class="med">0.832</td>
+        </tr>
+        <tr>
+          <td>k-NN k=10, samo ročne</td>
+          <td style="text-align:center" class="med">0.853</td>
+        </tr>
+        <tr>
+          <td>LR C=5, samo ročne</td>
+          <td style="text-align:center" class="med">0.855</td>
+        </tr>
+        <tr class="winner">
+          <td><strong>LR C=5, brez Drugo, prag 0.35</strong></td>
+          <td style="text-align:center" class="best">0.922</td>
+        </tr>
+      </table>
+      <div class="callout callout-green" style="margin-top:10px;font-size:12.5px">
+        <strong>+9 pp</strong> samo z odstranitvijo pseudo-labelov, dvigom C in ločitvijo Drugo od trening razredov — brez novih oznak.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">15</div>
+</div>
+
+<!-- ══ 16. SESSION — ITERATIVNI SELF-TRAINING ══ -->
+<div class="slide">
+  <div class="slide-header">
+    <div class="slide-tag">Session · Junij 2026</div>
+    <div class="slide-title">Iterativni self-training z LR pseudo-labeli</div>
+  </div>
+  <div class="slide-body" style="gap:20px">
+    <div class="col">
+      <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">Pristop</p>
+      <ul class="bullets" style="gap:10px">
+        <li><strong>Korak 1:</strong> treniraj LR na 873 ročnih oznakah (CV: 0.915)</li>
+        <li><strong>Korak 2:</strong> prediciraj vse neoznačene članke s tem modelom</li>
+        <li><strong>Pseudo-labeli:</strong> top-50 na šport pri zaupanju ≥ 0.95 → 550 novih labelov</li>
+        <li>Ključna razlika od prej: pseudo-labeli so iz <em>dobrega LR modela</em> (0.915), ne iz šumnega cosine similarity</li>
+        <li><strong>Retrenira</strong> na 873 ročnih + 550 LR pseudo → CV: 0.952</li>
+      </ul>
+      <div class="callout" style="margin-top:10px;font-size:12.5px">
+        <strong>Opomba:</strong> Športno plezanje (11 ročnih oznak) ni dobilo pseudo-labelov — model ni dosegel praga 0.95 za 50 člankov. Ta šport ostaja bolj negotov.
+      </div>
+    </div>
+    <div class="col" style="justify-content:center;gap:12px">
+      <p style="font-size:13px;font-weight:600;color:#374151;text-align:center">Napredek CV accuracy</p>
+      <div class="metrics" style="flex-direction:column;gap:10px">
+        <div class="metric" style="flex-direction:row;justify-content:space-between;padding:14px 20px">
+          <div style="text-align:left">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8">Izhodišče</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px">LR C=1, ročne + cosine pseudo</div>
+          </div>
+          <div class="metric-val" style="color:#dc2626">0.832</div>
+        </div>
+        <div class="metric" style="flex-direction:row;justify-content:space-between;padding:14px 20px">
+          <div style="text-align:left">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8">Po diagnozi</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px">LR C=5, brez pseudo, prag Drugo</div>
+          </div>
+          <div class="metric-val" style="color:#b45309">0.922</div>
+        </div>
+        <div class="metric" style="flex-direction:row;justify-content:space-between;padding:14px 20px;border:2px solid #6366f1">
+          <div style="text-align:left">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8">Končni model</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px">+ iterativni LR pseudo-labeli</div>
+          </div>
+          <div class="metric-val">0.952</div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:12px;color:#6366f1;font-weight:700">+12 pp skupaj · Drugo: 2.574 → 1.399 člankov</div>
+    </div>
+  </div>
+  <div class="slide-num">16</div>
+</div>
+
 </body>
 </html>
